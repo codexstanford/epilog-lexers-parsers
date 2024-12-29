@@ -1,41 +1,8 @@
-import {
-  datasetLexer,
-  DatasetTokenType,
-  isWhitespace,
-  type DatasetToken,
-} from "./dataset-lexer";
+import { datasetLexer } from "./dataset-lexer";
+import type { RulesetToken } from "./types";
 
 /* -------------------------------------------------------------------------- */
-/*                                    Types                                   */
-/* -------------------------------------------------------------------------- */
-
-export enum RulesetSpecificTokenType {
-  /** A string of letters, digits, and underscores beginning with an uppercase letter */
-  VARIABLE_NAMED = "VARIABLE_NAMED",
-  /** A lone underscore */
-  VARIABLE_ANONYMOUS = "VARIABLE_ANONYMOUS",
-  /** :- */
-  RULE_SEPARATOR_NECK = "RULE_SEPARATOR_NECK",
-  /** & */
-  AMPERSAND = "AMPERSAND",
-  /** ~ */
-  NEGATION_SYMBOL = "NEGATION_SYMBOL",
-  /** :: */
-  DOUBLE_COLON = "DOUBLE_COLON",
-  /** ==> */
-  DOUBLE_ARROW = "DOUBLE_ARROW",
-  /** := */
-  DEFINITION_SEPARATOR = "DEFINITION_SEPARATOR",
-}
-
-export type RulesetTokenType = DatasetTokenType | RulesetSpecificTokenType;
-
-export type RulesetToken = Omit<DatasetToken, "type"> & {
-  type: RulesetTokenType;
-};
-
-/* -------------------------------------------------------------------------- */
-/*                               Implementation                               */
+/*                                   Helpers                                  */
 /* -------------------------------------------------------------------------- */
 
 function isVariableNamedStart(char: string): boolean {
@@ -45,6 +12,10 @@ function isVariableNamedStart(char: string): boolean {
 function isVariableChar(char: string): boolean {
   return /[A-Za-z0-9_]/.test(char);
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                    Main                                    */
+/* -------------------------------------------------------------------------- */
 
 export function rulesetLexer(input: string): RulesetToken[] {
   const tokens: RulesetToken[] = [];
@@ -62,7 +33,7 @@ export function rulesetLexer(input: string): RulesetToken[] {
     if (char === "_") {
       pos++;
       tokens.push({
-        type: RulesetSpecificTokenType.VARIABLE_ANONYMOUS,
+        type: "VARIABLE_ANONYMOUS",
         start,
         end: pos,
         line,
@@ -77,7 +48,7 @@ export function rulesetLexer(input: string): RulesetToken[] {
         pos++;
       }
       tokens.push({
-        type: RulesetSpecificTokenType.VARIABLE_NAMED,
+        type: "VARIABLE_NAMED",
         start,
         end: pos,
         line,
@@ -90,7 +61,7 @@ export function rulesetLexer(input: string): RulesetToken[] {
     if (next3Chars === "==>") {
       pos += 3;
       tokens.push({
-        type: RulesetSpecificTokenType.DOUBLE_ARROW,
+        type: "DOUBLE_ARROW",
         start,
         end: pos,
         line,
@@ -102,7 +73,7 @@ export function rulesetLexer(input: string): RulesetToken[] {
     if (next2Chars === ":-") {
       pos += 2;
       tokens.push({
-        type: RulesetSpecificTokenType.RULE_SEPARATOR_NECK,
+        type: "RULE_SEPARATOR_NECK",
         start,
         end: pos,
         line,
@@ -114,7 +85,7 @@ export function rulesetLexer(input: string): RulesetToken[] {
     if (next2Chars === "::") {
       pos += 2;
       tokens.push({
-        type: RulesetSpecificTokenType.DOUBLE_COLON,
+        type: "DOUBLE_COLON",
         start,
         end: pos,
         line,
@@ -126,7 +97,7 @@ export function rulesetLexer(input: string): RulesetToken[] {
     if (next2Chars === ":=") {
       pos += 2;
       tokens.push({
-        type: RulesetSpecificTokenType.DEFINITION_SEPARATOR,
+        type: "DEFINITION_SEPARATOR",
         start,
         end: pos,
         line,
@@ -139,7 +110,7 @@ export function rulesetLexer(input: string): RulesetToken[] {
     if (char === "&") {
       pos++;
       tokens.push({
-        type: RulesetSpecificTokenType.AMPERSAND,
+        type: "AMPERSAND",
         start,
         end: pos,
         line,
@@ -151,7 +122,7 @@ export function rulesetLexer(input: string): RulesetToken[] {
     if (char === "~") {
       pos++;
       tokens.push({
-        type: RulesetSpecificTokenType.NEGATION_SYMBOL,
+        type: "NEGATION_SYMBOL",
         start,
         end: pos,
         line,
@@ -177,7 +148,7 @@ export function rulesetLexer(input: string): RulesetToken[] {
     // Handle unexpected characters
     pos++;
     tokens.push({
-      type: DatasetTokenType.ERROR,
+      type: "ERROR" as const,
       start,
       end: pos,
       line,

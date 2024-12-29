@@ -1,11 +1,7 @@
 import { expect } from "bun:test";
-import type { DatasetToken } from "./dataset-lexer";
-import type { RulesetToken } from "./ruleset-lexer";
+import type { RulesetToken } from "./types";
 
-export function validateTokenBoundaries(
-  input: string,
-  tokens: (DatasetToken | RulesetToken)[]
-) {
+export function validateTokenBoundaries(input: string, tokens: RulesetToken[]) {
   const totalTokenLength = tokens.reduce((sum, token) => {
     return sum + (token.end - token.start);
   }, 0);

@@ -1,62 +1,24 @@
-/* -------------------------------------------------------------------------- */
-/*                                    Types                                   */
-/* -------------------------------------------------------------------------- */
-
-export enum DatasetTokenType {
-  // a string of lowercase letters, digits, underscores, and periods, not beginning with an underscore
-  CONSTANT = "CONSTANT",
-  // any sequence of characters within double quotes, but newline characters must be explicit
-  STRING = "STRING",
-  // (
-  OPEN_PAREN = "OPEN_PAREN",
-  // )
-  CLOSE_PAREN = "CLOSE_PAREN",
-  // [
-  OPEN_BRACKET = "OPEN_BRACKET",
-  // ]
-  CLOSE_BRACKET = "CLOSE_BRACKET",
-  // !
-  LIST_SEPARATOR = "LIST_SEPARATOR",
-  // ,
-  COMMA = "COMMA",
-  // % to end of line
-  COMMENT = "COMMENT",
-  // .
-  PERIOD = "PERIOD",
-  // lexing errors
-  ERROR = "ERROR",
-  // spaces, tabs
-  WHITESPACE = "WHITESPACE",
-}
-
-export type DatasetToken = {
-  type: DatasetTokenType;
-  start: number;
-  end: number;
-  /**
-   * Non-whitespace tokens cannot span multiple lines, so if lexing error occurs
-   * can have error token span rest of line until terminal whitespace, then continue lexing from next line
-   */
-  line: number;
-  content: string;
-  errorMessage?: string;
-};
+import type { DatasetToken, DatasetTokenType } from "./types";
 
 /* -------------------------------------------------------------------------- */
-/*                               Implementation                               */
+/*                                   Helpers                                  */
 /* -------------------------------------------------------------------------- */
 
 export function isWhitespace(char: string): boolean {
   return /[\s\n\r\t]/.test(char);
 }
 
-function isConstantStart(char: string): boolean {
+export function isConstantStart(char: string): boolean {
   return /[a-z0-9]/.test(char);
 }
 
-function isConstantChar(char: string): boolean {
+export function isConstantChar(char: string): boolean {
   return /[a-z0-9._]/.test(char);
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                    Main                                    */
+/* -------------------------------------------------------------------------- */
 
 export function datasetLexer(input: string): DatasetToken[] {
   const tokens: DatasetToken[] = [];
@@ -76,7 +38,7 @@ export function datasetLexer(input: string): DatasetToken[] {
         pos++;
       }
       tokens.push({
-        type: DatasetTokenType.WHITESPACE,
+        type: "WHITESPACE",
         start: start,
         end: pos,
         line,
@@ -92,7 +54,7 @@ export function datasetLexer(input: string): DatasetToken[] {
       }
       if (input[start] === "_") {
         tokens.push({
-          type: DatasetTokenType.ERROR,
+          type: "ERROR",
           start,
           end: pos,
           line,
@@ -101,7 +63,7 @@ export function datasetLexer(input: string): DatasetToken[] {
         });
       } else {
         tokens.push({
-          type: DatasetTokenType.CONSTANT,
+          type: "CONSTANT",
           start,
           end: pos,
           line,
@@ -119,7 +81,7 @@ export function datasetLexer(input: string): DatasetToken[] {
       }
       if (pos >= input.length || input[pos] === "\n") {
         tokens.push({
-          type: DatasetTokenType.ERROR,
+          type: "ERROR",
           start,
           end: pos,
           line,
@@ -129,7 +91,7 @@ export function datasetLexer(input: string): DatasetToken[] {
       } else {
         pos++; // Include closing quote
         tokens.push({
-          type: DatasetTokenType.STRING,
+          type: "STRING",
           start,
           end: pos,
           line,
@@ -145,7 +107,7 @@ export function datasetLexer(input: string): DatasetToken[] {
         pos++;
       }
       tokens.push({
-        type: DatasetTokenType.COMMENT,
+        type: "COMMENT",
         start,
         end: pos,
         line,
@@ -156,13 +118,13 @@ export function datasetLexer(input: string): DatasetToken[] {
 
     // Handle single-character tokens
     const tokenMap: { [key: string]: DatasetTokenType } = {
-      "(": DatasetTokenType.OPEN_PAREN,
-      ")": DatasetTokenType.CLOSE_PAREN,
-      "[": DatasetTokenType.OPEN_BRACKET,
-      "]": DatasetTokenType.CLOSE_BRACKET,
-      "!": DatasetTokenType.LIST_SEPARATOR,
-      ",": DatasetTokenType.COMMA,
-      ".": DatasetTokenType.PERIOD,
+      "(": "OPEN_PAREN",
+      ")": "CLOSE_PAREN",
+      "[": "OPEN_BRACKET",
+      "]": "CLOSE_BRACKET",
+      "!": "LIST_SEPARATOR",
+      ",": "COMMA",
+      ".": "PERIOD",
     };
 
     if (char in tokenMap) {
@@ -180,7 +142,7 @@ export function datasetLexer(input: string): DatasetToken[] {
     // Handle unknown characters
     pos++;
     tokens.push({
-      type: DatasetTokenType.ERROR,
+      type: "ERROR",
       start,
       end: pos,
       line,
