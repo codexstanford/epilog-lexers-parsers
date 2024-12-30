@@ -16,8 +16,10 @@ describe("parseCompoundTerm", () => {
     expect(result?.children?.[0]?.type).toBe("CONSTANT");
     expect(result?.children?.[0]?.content).toBe("f");
     expect(result?.children?.[1]?.type).toBe("OPEN_PAREN");
-    expect(result?.children?.[2]?.type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[2]?.type).toBe("TERM");
     expect(result?.children?.[2]?.content).toBe("x");
+    expect(result?.children?.[2]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[2]?.children?.[0].content).toBe("x");
     expect(result?.children?.[3]?.type).toBe("CLOSE_PAREN");
   });
 
@@ -34,9 +36,13 @@ describe("parseCompoundTerm", () => {
     expect(result?.children).toHaveLength(6);
     expect(result?.children?.[0]?.type).toBe("CONSTANT");
     expect(result?.children?.[1]?.type).toBe("OPEN_PAREN");
-    expect(result?.children?.[2]?.type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[2]?.type).toBe("TERM");
+    expect(result?.children?.[2]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[2]?.children?.[0].content).toBe("x");
     expect(result?.children?.[3]?.type).toBe("COMMA");
-    expect(result?.children?.[4]?.type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[4]?.type).toBe("TERM");
+    expect(result?.children?.[4]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[4]?.children?.[0].content).toBe("y");
     expect(result?.children?.[5]?.type).toBe("CLOSE_PAREN");
   });
 
@@ -48,8 +54,9 @@ describe("parseCompoundTerm", () => {
     expect(result?.type).toBe("COMPOUND_TERM");
     expect(result?.content).toBe("f(g(x))");
     expect(result?.children).toHaveLength(4);
-    expect(result?.children?.[2]?.type).toBe("COMPOUND_TERM");
-    expect(result?.children?.[2]?.content).toBe("g(x)");
+    expect(result?.children?.[2]?.type).toBe("TERM");
+    expect(result?.children?.[2]?.children?.[0].type).toBe("COMPOUND_TERM");
+    expect(result?.children?.[2]?.children?.[0].content).toBe("g(x)");
   });
 
   test("should handle whitespace between arguments", () => {
@@ -121,19 +128,23 @@ describe("parseCompoundTerm", () => {
 
     // Check first level
     expect(result?.children).toHaveLength(4);
-    const level2 = result?.children?.[2];
+    expect(result?.children?.[2]?.type).toBe("TERM");
+    const level2 = result?.children?.[2]?.children?.[0];
     expect(level2?.type).toBe("COMPOUND_TERM");
 
     // Check second level
-    const level3 = level2?.children?.[2];
+    expect(level2?.children?.[2]?.type).toBe("TERM");
+    const level3 = level2?.children?.[2]?.children?.[0];
     expect(level3?.type).toBe("COMPOUND_TERM");
 
     // Check third level
-    const level4 = level3?.children?.[2];
+    expect(level3?.children?.[2]?.type).toBe("TERM");
+    const level4 = level3?.children?.[2]?.children?.[0];
     expect(level4?.type).toBe("COMPOUND_TERM");
 
     // Check innermost level
-    const level5 = level4?.children?.[2];
+    expect(level4?.children?.[2]?.type).toBe("TERM");
+    const level5 = level4?.children?.[2]?.children?.[0];
     expect(level5?.type).toBe("CONSTANT_TERM");
     expect(level5?.content).toBe("x");
   });
@@ -150,11 +161,18 @@ describe("parseCompoundTerm", () => {
     expect(result?.content).toBe("f(x, [y,z], w)");
 
     // Check list in the middle
-    const listTerm = result?.children?.[5];
-    expect(listTerm?.type).toBe("LIST_TERM");
-    expect(listTerm?.content).toBe("[y,z]");
-    expect(listTerm?.children).toHaveLength(5);
-    expect(listTerm?.children?.[1]?.content).toBe("y");
-    expect(listTerm?.children?.[3]?.content).toBe("z");
+    const middleArg = result?.children?.[5];
+    expect(middleArg?.type).toBe("TERM");
+    expect(middleArg?.children?.[0].type).toBe("LIST_TERM");
+    expect(middleArg?.children?.[0].content).toBe("[y,z]");
+    expect(middleArg?.children?.[0].children).toHaveLength(5);
+    expect(middleArg?.children?.[0].children?.[1]?.type).toBe("TERM");
+    expect(middleArg?.children?.[0].children?.[1]?.children?.[0].content).toBe(
+      "y"
+    );
+    expect(middleArg?.children?.[0].children?.[3]?.type).toBe("TERM");
+    expect(middleArg?.children?.[0].children?.[3]?.children?.[0].content).toBe(
+      "z"
+    );
   });
 });
