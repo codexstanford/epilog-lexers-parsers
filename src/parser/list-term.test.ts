@@ -40,8 +40,10 @@ describe("parseListTerm", () => {
     expect(result?.children).toHaveLength(3);
     expect(result?.children?.[0]?.type).toBe("OPEN_BRACKET");
     expect(result?.children?.[0]?.content).toBe("[");
-    expect(result?.children?.[1]?.type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[1]?.type).toBe("TERM");
     expect(result?.children?.[1]?.content).toBe("x");
+    expect(result?.children?.[1]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[1]?.children?.[0].content).toBe("x");
     expect(result?.children?.[2]?.type).toBe("CLOSE_BRACKET");
     expect(result?.children?.[2]?.content).toBe("]");
   });
@@ -56,12 +58,16 @@ describe("parseListTerm", () => {
     expect(result?.children).toHaveLength(5);
     expect(result?.children?.[0]?.type).toBe("OPEN_BRACKET");
     expect(result?.children?.[0]?.content).toBe("[");
-    expect(result?.children?.[1]?.type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[1]?.type).toBe("TERM");
     expect(result?.children?.[1]?.content).toBe("x");
+    expect(result?.children?.[1]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[1]?.children?.[0].content).toBe("x");
     expect(result?.children?.[2]?.type).toBe("COMMA");
     expect(result?.children?.[2]?.content).toBe(",");
-    expect(result?.children?.[3]?.type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[3]?.type).toBe("TERM");
     expect(result?.children?.[3]?.content).toBe("y");
+    expect(result?.children?.[3]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[3]?.children?.[0].content).toBe("y");
     expect(result?.children?.[4]?.type).toBe("CLOSE_BRACKET");
     expect(result?.children?.[4]?.content).toBe("]");
   });
@@ -76,16 +82,18 @@ describe("parseListTerm", () => {
     expect(result?.children).toHaveLength(7);
     expect(result?.children?.[0]?.type).toBe("OPEN_BRACKET");
     expect(result?.children?.[0]?.content).toBe("[");
-    expect(result?.children?.[1]?.type).toBe("CONSTANT_TERM");
-    expect(result?.children?.[1]?.content).toBe("x");
+    expect(result?.children?.[1]?.type).toBe("TERM");
+    expect(result?.children?.[1]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[1]?.children?.[0].content).toBe("x");
     expect(result?.children?.[2]?.type).toBe("WHITESPACE");
     expect(result?.children?.[2]?.content).toBe(" ");
     expect(result?.children?.[3]?.type).toBe("COMMA");
     expect(result?.children?.[3]?.content).toBe(",");
     expect(result?.children?.[4]?.type).toBe("WHITESPACE");
     expect(result?.children?.[4]?.content).toBe(" ");
-    expect(result?.children?.[5]?.type).toBe("CONSTANT_TERM");
-    expect(result?.children?.[5]?.content).toBe("y");
+    expect(result?.children?.[5]?.type).toBe("TERM");
+    expect(result?.children?.[5]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[5]?.children?.[0].content).toBe("y");
     expect(result?.children?.[6]?.type).toBe("CLOSE_BRACKET");
     expect(result?.children?.[6]?.content).toBe("]");
   });
@@ -99,12 +107,14 @@ describe("parseListTerm", () => {
     expect(result?.content).toBe("[x,[y]]");
     expect(result?.children).toHaveLength(5);
     expect(result?.children?.[0]?.type).toBe("OPEN_BRACKET");
-    expect(result?.children?.[1]?.type).toBe("CONSTANT_TERM");
-    expect(result?.children?.[1]?.content).toBe("x");
+    expect(result?.children?.[1]?.type).toBe("TERM");
+    expect(result?.children?.[1]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[1]?.children?.[0].content).toBe("x");
     expect(result?.children?.[2]?.type).toBe("COMMA");
     expect(result?.children?.[2]?.content).toBe(",");
-    expect(result?.children?.[3]?.type).toBe("LIST_TERM");
-    expect(result?.children?.[3]?.content).toBe("[y]");
+    expect(result?.children?.[3]?.type).toBe("TERM");
+    expect(result?.children?.[3]?.children?.[0].type).toBe("LIST_TERM");
+    expect(result?.children?.[3]?.children?.[0].content).toBe("[y]");
     expect(result?.children?.[4]?.type).toBe("CLOSE_BRACKET");
   });
 
@@ -168,36 +178,41 @@ describe("parseListTerm", () => {
     // Check first level
     expect(result?.children).toHaveLength(3);
     expect(result?.children?.[0]?.type).toBe("OPEN_BRACKET");
-    expect(result?.children?.[1]?.type).toBe("LIST_TERM");
+    expect(result?.children?.[1]?.type).toBe("TERM");
+    expect(result?.children?.[1]?.children?.[0].type).toBe("LIST_TERM");
     expect(result?.children?.[2]?.type).toBe("CLOSE_BRACKET");
 
     // Check second level
-    const level2 = result?.children?.[1];
+    const level2 = result?.children?.[1]?.children?.[0];
     expect(level2?.children).toHaveLength(3);
     expect(level2?.children?.[0]?.type).toBe("OPEN_BRACKET");
-    expect(level2?.children?.[1]?.type).toBe("LIST_TERM");
+    expect(level2?.children?.[1]?.type).toBe("TERM");
+    expect(level2?.children?.[1]?.children?.[0].type).toBe("LIST_TERM");
     expect(level2?.children?.[2]?.type).toBe("CLOSE_BRACKET");
 
     // Check third level
-    const level3 = level2?.children?.[1];
+    const level3 = level2?.children?.[1]?.children?.[0];
     expect(level3?.children).toHaveLength(3);
     expect(level3?.children?.[0]?.type).toBe("OPEN_BRACKET");
-    expect(level3?.children?.[1]?.type).toBe("LIST_TERM");
+    expect(level3?.children?.[1]?.type).toBe("TERM");
+    expect(level3?.children?.[1]?.children?.[0].type).toBe("LIST_TERM");
     expect(level3?.children?.[2]?.type).toBe("CLOSE_BRACKET");
 
     // Check fourth level
-    const level4 = level3?.children?.[1];
+    const level4 = level3?.children?.[1]?.children?.[0];
     expect(level4?.children).toHaveLength(3);
     expect(level4?.children?.[0]?.type).toBe("OPEN_BRACKET");
-    expect(level4?.children?.[1]?.type).toBe("LIST_TERM");
+    expect(level4?.children?.[1]?.type).toBe("TERM");
+    expect(level4?.children?.[1]?.children?.[0].type).toBe("LIST_TERM");
     expect(level4?.children?.[2]?.type).toBe("CLOSE_BRACKET");
 
     // Check innermost level
-    const level5 = level4?.children?.[1];
+    const level5 = level4?.children?.[1]?.children?.[0];
     expect(level5?.children).toHaveLength(3);
     expect(level5?.children?.[0]?.type).toBe("OPEN_BRACKET");
-    expect(level5?.children?.[1]?.type).toBe("CONSTANT_TERM");
-    expect(level5?.children?.[1]?.content).toBe("x");
+    expect(level5?.children?.[1]?.type).toBe("TERM");
+    expect(level5?.children?.[1]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(level5?.children?.[1]?.children?.[0].content).toBe("x");
     expect(level5?.children?.[2]?.type).toBe("CLOSE_BRACKET");
   });
 
@@ -213,11 +228,12 @@ describe("parseListTerm", () => {
     expect(result?.content).toBe("[x, f(y), z]");
 
     // Check compound term in the middle
-    const compoundTerm = result?.children?.[4];
-    expect(compoundTerm?.type).toBe("COMPOUND_TERM");
-    expect(compoundTerm?.content).toBe("f(y)");
-    expect(compoundTerm?.children).toHaveLength(4);
-    expect(compoundTerm?.children?.[0]?.content).toBe("f");
-    expect(compoundTerm?.children?.[2]?.content).toBe("y");
+    const middleTerm = result?.children?.[4];
+    expect(middleTerm?.type).toBe("TERM");
+    expect(middleTerm?.children?.[0].type).toBe("COMPOUND_TERM");
+    expect(middleTerm?.children?.[0].content).toBe("f(y)");
+    expect(middleTerm?.children?.[0].children).toHaveLength(4);
+    expect(middleTerm?.children?.[0].children?.[0]?.content).toBe("f");
+    expect(middleTerm?.children?.[0].children?.[2]?.content).toBe("y");
   });
 });
