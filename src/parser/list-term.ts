@@ -82,6 +82,7 @@ function parseBracketedList(
 
   while (true) {
     const token = peek(currentState);
+
     if (!token) {
       hasError = true;
       const [errorObject, errorState] = createErrorObjectAndAdvanceToNextLine(
@@ -93,11 +94,29 @@ function parseBracketedList(
       break;
     }
 
-    if (token.type === "WHITESPACE" || token.type === "CLOSE_BRACKET") {
+    if (token.type === "WHITESPACE") {
       children.push(token);
       currentState = advance(currentState)[1];
-      if (token.type === "CLOSE_BRACKET") break;
       continue;
+    }
+
+    if (token.type === "CLOSE_BRACKET") {
+      // A close bracket is not allowed directly after a comma
+      const lastNonWhitespace = getLastNonWhitespaceObject(children);
+      if (lastNonWhitespace?.type === "COMMA") {
+        hasError = true;
+        const [errorObject, errorState] = createErrorObjectAndAdvanceToNextLine(
+          currentState,
+          "Expected term, but found closing bracket"
+        );
+        children.push(errorObject);
+        currentState = errorState;
+        break;
+      }
+
+      children.push(token);
+      currentState = advance(currentState)[1];
+      break;
     }
 
     const [success, newState] = parseBracketedListElement(
