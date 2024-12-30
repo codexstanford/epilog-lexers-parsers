@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { datasetLexer } from "../dataset-lexer";
-import type { ParserState, RulesetParserObject } from "../types";
+import type { RulesetParserObject } from "../types";
 import { createState } from "./_control-flow";
 import { parseConstantTerm } from "./constant-term";
 

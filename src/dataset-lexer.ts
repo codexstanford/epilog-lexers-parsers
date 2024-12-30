@@ -37,17 +37,36 @@ export function datasetLexer(input: string): DatasetToken[] {
     if (isWhitespace(char)) {
       while (pos < input.length && isWhitespace(input[pos])) {
         if (input[pos] === "\n") {
+          // Push current whitespace token if any
+          if (pos > start) {
+            tokens.push({
+              type: "WHITESPACE",
+              start: start,
+              end: pos,
+              line,
+              content: input.slice(start, pos),
+            });
+          }
+          // Increment line counter and update start position
           line++;
+          pos++;
+          start = pos;
+        } else {
+          pos++;
         }
-        pos++;
       }
-      tokens.push({
-        type: "WHITESPACE",
-        start: start,
-        end: pos,
-        line,
-        content: input.slice(start, pos),
-      });
+
+      // Push remaining whitespace if any
+      if (pos > start) {
+        tokens.push({
+          type: "WHITESPACE",
+          start: start,
+          end: pos,
+          line,
+          content: input.slice(start, pos),
+        });
+      }
+
       continue;
     }
 
@@ -57,7 +76,7 @@ export function datasetLexer(input: string): DatasetToken[] {
         pos++;
       }
       // Optional decimal part
-      if (input[pos] === '.' && isDigit(input[pos + 1])) {
+      if (input[pos] === "." && isDigit(input[pos + 1])) {
         pos++; // consume dot
         while (pos < input.length && isDigit(input[pos])) {
           pos++;

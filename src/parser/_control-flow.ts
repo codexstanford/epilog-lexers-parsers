@@ -1,4 +1,4 @@
-import type { ParserState, RulesetToken } from "../types";
+import type { ParserState, RulesetParserObject, RulesetToken } from "../types";
 
 /**
  * Creates initial parser state from tokens, filtering out whitespace and comments
@@ -11,9 +11,7 @@ export function createState(
 ): ParserState {
   return {
     setType,
-    tokens: tokens.filter(
-      (t) => t.type !== "WHITESPACE" && t.type !== "COMMENT"
-    ),
+    tokens,
     current: 0,
   };
 }
@@ -40,4 +38,47 @@ export function advance(
   if (state.current >= state.tokens.length) return [null, state];
   const token = state.tokens[state.current];
   return [token, { ...state, current: state.current + 1 }];
+}
+
+export function createErrorObjectAndAdvanceToNextLine(
+  state: ParserState,
+  errorMessage: string
+): [RulesetParserObject, ParserState] {
+  let currentToken = peek(state);
+
+  if (!currentToken)
+    return [
+      {
+        type: "ERROR",
+        start: state.tokens[state.tokens.length - 1].end,
+        end: state.tokens[state.tokens.length - 1].end + 1,
+        line: state.tokens[state.tokens.length - 1].line,
+        content: "",
+        errorMessage,
+      },
+      state,
+    ];
+
+  const children: RulesetToken[] = [];
+  const currentLine = currentToken.line;
+  let currentState = state;
+
+  while (currentToken && currentToken.line === currentLine) {
+    children.push(currentToken);
+    currentState = advance(currentState)[1];
+    currentToken = peek(currentState);
+  }
+
+  return [
+    {
+      type: "ERROR",
+      start: children[0].start,
+      end: children[children.length - 1].end,
+      line: children[0].line,
+      content: children.map((c) => c.content).join(""),
+      errorMessage,
+      children,
+    },
+    currentState,
+  ];
 }
