@@ -41,6 +41,17 @@ export function isDigit(char: string): boolean {
 /*                                   Helpers                                  */
 /* -------------------------------------------------------------------------- */
 
+export function createLexerState(input: string): LexerState {
+  const state: LexerState = {
+    input,
+    pos: 0,
+    line: 1,
+    tokens: [],
+  };
+
+  return state;
+}
+
 export function createToken(
   state: LexerState,
   type: RulesetTokenType,

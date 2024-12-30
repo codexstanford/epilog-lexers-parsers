@@ -10,6 +10,7 @@ export function handleConstant(state: LexerState): void {
     (isConstantChar(state.input[state.pos]) ||
       // Periods are allowed only if followed by another constant character
       (state.input[state.pos] === "." &&
+        state.pos + 1 < state.input.length &&
         isConstantChar(state.input[state.pos + 1])))
   ) {
     state.pos++;

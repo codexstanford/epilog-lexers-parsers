@@ -1,4 +1,5 @@
 import {
+  createLexerState,
   createToken,
   isConstantStart,
   isDigit,
@@ -13,12 +14,7 @@ import { handleWhitespace } from "./lexer/whitespace";
 import type { LexerState, RulesetToken } from "./types";
 
 export function datasetLexer(input: string): RulesetToken[] {
-  const state: LexerState = {
-    input,
-    pos: 0,
-    line: 1,
-    tokens: [],
-  };
+  const state: LexerState = createLexerState(input);
 
   while (state.pos < input.length) {
     const char = input[state.pos];
