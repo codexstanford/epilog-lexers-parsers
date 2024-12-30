@@ -200,4 +200,24 @@ describe("parseListTerm", () => {
     expect(level5?.children?.[1]?.content).toBe("x");
     expect(level5?.children?.[2]?.type).toBe("CLOSE_BRACKET");
   });
+
+  test("should parse list containing compound term", () => {
+    const state: ParserState = createState(
+      datasetLexer("[x, f(y), z]"),
+      "DATASET"
+    );
+
+    const [result] = parseListTerm(state);
+    expect(result).not.toBeNull();
+    expect(result?.type).toBe("LIST_TERM");
+    expect(result?.content).toBe("[x, f(y), z]");
+
+    // Check compound term in the middle
+    const compoundTerm = result?.children?.[4];
+    expect(compoundTerm?.type).toBe("COMPOUND_TERM");
+    expect(compoundTerm?.content).toBe("f(y)");
+    expect(compoundTerm?.children).toHaveLength(4);
+    expect(compoundTerm?.children?.[0]?.content).toBe("f");
+    expect(compoundTerm?.children?.[2]?.content).toBe("y");
+  });
 });

@@ -1,5 +1,5 @@
-import { peek, advance } from "./_control-flow";
 import type { ParserState, RulesetParserObject } from "../types";
+import { parseCompoundTerm } from "./compound-term";
 import { parseConstantTerm } from "./constant-term";
 import { parseListTerm } from "./list-term";
 
@@ -13,15 +13,17 @@ import { parseListTerm } from "./list-term";
 export function parseTerm(
   state: ParserState
 ): [RulesetParserObject | null, ParserState] {
-  // Try parsing constant term
-  const [constantResult, constantState] = parseConstantTerm(state);
-  if (constantResult) return [constantResult, constantState];
+  // Try parsing compound term
+  const [compoundResult, compoundState] = parseCompoundTerm(state);
+  if (compoundResult) return [compoundResult, compoundState];
 
   // Try parsing list term
   const [listResult, listState] = parseListTerm(state);
   if (listResult) return [listResult, listState];
 
-  // TODO: Add compound term parsing later
-  
+  // Try parsing constant term
+  const [constantResult, constantState] = parseConstantTerm(state);
+  if (constantResult) return [constantResult, constantState];
+
   return [null, state];
 }
