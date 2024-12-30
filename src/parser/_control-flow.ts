@@ -5,7 +5,7 @@ import type { ParserState, RulesetParserObject, RulesetToken } from "../types";
  * @param tokens Raw tokens from lexer
  * @returns Clean parser state ready for processing
  */
-export function createState(
+export function createParserState(
   tokens: RulesetToken[],
   setType: "DATASET" | "RULESET"
 ): ParserState {

@@ -27,7 +27,7 @@ export function parseFact(
   // Try parsing compound term
   const [compoundResult, compoundState] = parseCompoundTerm(state);
   if (compoundResult) {
-    children.push(compoundResult);
+    children.push(...(compoundResult.children || []));
     currentState = compoundState;
   } else {
     const nextToken = peek(currentState);

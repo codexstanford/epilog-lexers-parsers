@@ -1,12 +1,15 @@
 import { describe, expect, test } from "bun:test";
 import type { ParserState } from "../types";
 import { parseCompoundTerm } from "./compound-term";
-import { createState } from "./_control-flow";
+import { createParserState } from "./_control-flow";
 import { datasetLexer } from "../dataset-lexer";
 
 describe("parseCompoundTerm", () => {
   test("should parse compound term with single argument", () => {
-    const state: ParserState = createState(datasetLexer("f(x)"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("f(x)"),
+      "DATASET"
+    );
 
     const [result] = parseCompoundTerm(state);
     expect(result).not.toBeNull();
@@ -24,7 +27,7 @@ describe("parseCompoundTerm", () => {
   });
 
   test("should parse compound term with multiple arguments", () => {
-    const state: ParserState = createState(
+    const state: ParserState = createParserState(
       datasetLexer("pred(x,y)"),
       "DATASET"
     );
@@ -47,7 +50,10 @@ describe("parseCompoundTerm", () => {
   });
 
   test("should parse nested compound terms", () => {
-    const state: ParserState = createState(datasetLexer("f(g(x))"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("f(g(x))"),
+      "DATASET"
+    );
 
     const [result] = parseCompoundTerm(state);
     expect(result).not.toBeNull();
@@ -60,7 +66,7 @@ describe("parseCompoundTerm", () => {
   });
 
   test("should handle whitespace between arguments", () => {
-    const state: ParserState = createState(
+    const state: ParserState = createParserState(
       datasetLexer("f( x , y )"),
       "DATASET"
     );
@@ -74,49 +80,64 @@ describe("parseCompoundTerm", () => {
   });
 
   test("should handle error for unclosed parenthesis", () => {
-    const state: ParserState = createState(datasetLexer("f(x"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("f(x"),
+      "DATASET"
+    );
 
     const [result] = parseCompoundTerm(state);
     expect(result?.type).toBe("ERROR");
   });
 
   test("should handle error for missing comma between arguments", () => {
-    const state: ParserState = createState(datasetLexer("f(x y)"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("f(x y)"),
+      "DATASET"
+    );
 
     const [result] = parseCompoundTerm(state);
     expect(result?.type).toBe("ERROR");
   });
 
   test("should handle error for trailing comma", () => {
-    const state: ParserState = createState(datasetLexer("f(x,)"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("f(x,)"),
+      "DATASET"
+    );
 
     const [result] = parseCompoundTerm(state);
     expect(result?.type).toBe("ERROR");
   });
 
   test("should handle error for consecutive commas", () => {
-    const state: ParserState = createState(datasetLexer("f(x,,y)"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("f(x,,y)"),
+      "DATASET"
+    );
 
     const [result] = parseCompoundTerm(state);
     expect(result?.type).toBe("ERROR");
   });
 
   test("should not parse bare constant without parentheses", () => {
-    const state: ParserState = createState(datasetLexer("f"), "DATASET");
+    const state: ParserState = createParserState(datasetLexer("f"), "DATASET");
 
     const [result] = parseCompoundTerm(state);
     expect(result).toBeNull();
   });
 
   test("should handle error for invalid term type", () => {
-    const state: ParserState = createState(datasetLexer("f(?)"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("f(?)"),
+      "DATASET"
+    );
 
     const [result] = parseCompoundTerm(state);
     expect(result?.type).toBe("ERROR");
   });
 
   test("should parse deeply nested compound terms", () => {
-    const state: ParserState = createState(
+    const state: ParserState = createParserState(
       datasetLexer("f(g(h(i(x))))"),
       "DATASET"
     );
@@ -150,7 +171,7 @@ describe("parseCompoundTerm", () => {
   });
 
   test("should parse compound term containing list", () => {
-    const state: ParserState = createState(
+    const state: ParserState = createParserState(
       datasetLexer("f(x, [y,z], w)"),
       "DATASET"
     );

@@ -1,12 +1,15 @@
 import { describe, expect, test } from "bun:test";
 import type { ParserState } from "../types";
 import { parseListTerm } from "./list-term";
-import { createState } from "./_control-flow";
+import { createParserState } from "./_control-flow";
 import { datasetLexer } from "../dataset-lexer";
 
 describe("parseListTerm", () => {
   test("should parse nil constant", () => {
-    const state: ParserState = createState(datasetLexer("nil"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("nil"),
+      "DATASET"
+    );
 
     const [result] = parseListTerm(state);
     expect(result).not.toBeNull();
@@ -17,7 +20,7 @@ describe("parseListTerm", () => {
   });
 
   test("should parse empty bracketed list", () => {
-    const state: ParserState = createState(datasetLexer("[]"), "DATASET");
+    const state: ParserState = createParserState(datasetLexer("[]"), "DATASET");
 
     const [result] = parseListTerm(state);
     expect(result).not.toBeNull();
@@ -31,7 +34,10 @@ describe("parseListTerm", () => {
   });
 
   test("should parse bracketed list with single term", () => {
-    const state: ParserState = createState(datasetLexer("[x]"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("[x]"),
+      "DATASET"
+    );
 
     const [result] = parseListTerm(state);
     expect(result).not.toBeNull();
@@ -49,7 +55,10 @@ describe("parseListTerm", () => {
   });
 
   test("should parse bracketed list with multiple terms", () => {
-    const state: ParserState = createState(datasetLexer("[x,y]"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("[x,y]"),
+      "DATASET"
+    );
 
     const [result] = parseListTerm(state);
     expect(result).not.toBeNull();
@@ -73,7 +82,10 @@ describe("parseListTerm", () => {
   });
 
   test("should parse list with whitespace between terms", () => {
-    const state: ParserState = createState(datasetLexer("[x , y]"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("[x , y]"),
+      "DATASET"
+    );
 
     const [result] = parseListTerm(state);
     expect(result).not.toBeNull();
@@ -99,7 +111,10 @@ describe("parseListTerm", () => {
   });
 
   test("should parse nested list", () => {
-    const state: ParserState = createState(datasetLexer("[x,[y]]"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("[x,[y]]"),
+      "DATASET"
+    );
 
     const [result] = parseListTerm(state);
     expect(result).not.toBeNull();
@@ -119,21 +134,27 @@ describe("parseListTerm", () => {
   });
 
   test("should handle error for unclosed bracket", () => {
-    const state: ParserState = createState(datasetLexer("[x"), "DATASET");
+    const state: ParserState = createParserState(datasetLexer("[x"), "DATASET");
 
     const [result] = parseListTerm(state);
     expect(result?.type).toBe("ERROR");
   });
 
   test("should handle error for missing comma between elements", () => {
-    const state: ParserState = createState(datasetLexer("[x y]"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("[x y]"),
+      "DATASET"
+    );
 
     const [result] = parseListTerm(state);
     expect(result?.type).toBe("ERROR");
   });
 
   test("should handle list with only whitespace", () => {
-    const state: ParserState = createState(datasetLexer("[ ]"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("[ ]"),
+      "DATASET"
+    );
 
     const [result] = parseListTerm(state);
     expect(result).not.toBeNull();
@@ -144,28 +165,37 @@ describe("parseListTerm", () => {
   });
 
   test("should handle error for trailing comma", () => {
-    const state: ParserState = createState(datasetLexer("[x,]"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("[x,]"),
+      "DATASET"
+    );
 
     const [result] = parseListTerm(state);
     expect(result?.type).toBe("ERROR");
   });
 
   test("should handle error for consecutive commas", () => {
-    const state: ParserState = createState(datasetLexer("[x,,y]"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("[x,,y]"),
+      "DATASET"
+    );
 
     const [result] = parseListTerm(state);
     expect(result?.type).toBe("ERROR");
   });
 
   test("should handle error for invalid term type", () => {
-    const state: ParserState = createState(datasetLexer("[?]"), "DATASET");
+    const state: ParserState = createParserState(
+      datasetLexer("[?]"),
+      "DATASET"
+    );
 
     const [result] = parseListTerm(state);
     expect(result?.type).toBe("ERROR");
   });
 
   test("should handle deeply nested lists", () => {
-    const state: ParserState = createState(
+    const state: ParserState = createParserState(
       datasetLexer("[[[[[x]]]]]"),
       "DATASET"
     );
@@ -217,7 +247,7 @@ describe("parseListTerm", () => {
   });
 
   test("should parse list containing compound term", () => {
-    const state: ParserState = createState(
+    const state: ParserState = createParserState(
       datasetLexer("[x, f(y), z]"),
       "DATASET"
     );
