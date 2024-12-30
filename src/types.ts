@@ -53,6 +53,15 @@ export interface RulesetToken extends Base {
   type: RulesetTokenType;
 }
 
+/* --------------------------------- Common --------------------------------- */
+
+export interface LexerState {
+  input: string;
+  pos: number;
+  line: number;
+  tokens: RulesetToken[];
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                   Parser                                   */
 /* -------------------------------------------------------------------------- */
