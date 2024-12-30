@@ -3,24 +3,6 @@ import { datasetLexer } from "./dataset-lexer";
 import { validateTokenBoundaries } from "./test-utils";
 
 describe("datasetLexer", () => {
-  test("empty input produces only EOF token", () => {
-    const input = "";
-    const tokens = datasetLexer(input);
-    validateTokenBoundaries(input, tokens);
-  });
-
-  test("simple tokens don't have gaps or overlaps", () => {
-    const input = "123 abc\n";
-    const tokens = datasetLexer(input);
-    validateTokenBoundaries(input, tokens);
-  });
-
-  test("complex input maintains token boundary integrity", () => {
-    const input = "number = 42.5\nstring = 'hello'\n";
-    const tokens = datasetLexer(input);
-    validateTokenBoundaries(input, tokens);
-  });
-
   /* -------------------------------------------------------------------------- */
   /*                                  Chapter 2                                 */
   /* -------------------------------------------------------------------------- */

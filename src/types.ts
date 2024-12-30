@@ -21,6 +21,7 @@ export type DatasetTokenType =
   | "WHITESPACE"
   | "CONSTANT"
   | "STRING"
+  | "NUMBER"
   | "COMMENT"
   | "OPEN_PAREN"
   | "CLOSE_PAREN"
@@ -59,22 +60,14 @@ export interface RulesetToken extends Base {
 /* --------------------------------- Dataset -------------------------------- */
 
 export type DatasetParserObjectType =
-  | "CONSTANT_TERM"
-  | "SYMBOL_TERM"
-  | "LIST_TERM"
-  | "NUMBER"
-  | "STRING"
-  | "OPEN_PAREN"
-  | "CLOSE_PAREN"
-  | "COMMA"
-  | "COMMENT"
-  | "PUNCTUATION_PERIOD"
-  | "ERROR"
-  | "WHITESPACE"
+  | "DATASET"
   | "FACT"
   | "TERM"
+  | "CONSTANT_TERM"
   | "COMPOUND_TERM"
-  | "DATASET";
+  | "LIST_TERM"
+  | "SYMBOL_TERM"
+  | DatasetTokenType;
 
 export interface DatasetParserObject extends Base {
   type: DatasetParserObjectType;
@@ -104,4 +97,12 @@ export type RulesetParserObjectType =
 export interface RulesetParserObject extends Base {
   type: RulesetParserObjectType;
   children?: RulesetParserObject[];
+}
+
+/* --------------------------------- Common --------------------------------- */
+
+export interface ParserState {
+  setType: "DATASET" | "RULESET";
+  tokens: RulesetToken[];
+  current: number;
 }

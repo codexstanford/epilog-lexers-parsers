@@ -16,6 +16,10 @@ export function isConstantChar(char: string): boolean {
   return /[a-z0-9._]/.test(char);
 }
 
+export function isDigit(char: string): boolean {
+  return /[0-9]/.test(char);
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                    Main                                    */
 /* -------------------------------------------------------------------------- */
@@ -40,6 +44,28 @@ export function datasetLexer(input: string): DatasetToken[] {
       tokens.push({
         type: "WHITESPACE",
         start: start,
+        end: pos,
+        line,
+        content: input.slice(start, pos),
+      });
+      continue;
+    }
+
+    // Handle numbers
+    if (isDigit(char)) {
+      while (pos < input.length && isDigit(input[pos])) {
+        pos++;
+      }
+      // Optional decimal part
+      if (input[pos] === '.' && isDigit(input[pos + 1])) {
+        pos++; // consume dot
+        while (pos < input.length && isDigit(input[pos])) {
+          pos++;
+        }
+      }
+      tokens.push({
+        type: "NUMBER",
+        start,
         end: pos,
         line,
         content: input.slice(start, pos),
