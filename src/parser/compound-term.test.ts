@@ -196,4 +196,66 @@ describe("parseCompoundTerm", () => {
       "z"
     );
   });
+
+  test("should parse multi-line compound term", () => {
+    const state: ParserState = createParserState(
+      datasetLexer("f(\n  x,\n  y,\n  z\n)"),
+      "DATASET"
+    );
+
+    const [result] = parseCompoundTerm(state);
+    expect(result).not.toBeNull();
+    expect(result?.type).toBe("COMPOUND_TERM");
+    expect(result?.content).toBe("f(\n  x,\n  y,\n  z\n)");
+    expect(result?.line).toBe(1);
+    expect(result?.endLine).toBe(5);
+
+    // Verify children are on correct lines
+    expect(result?.children?.[0]?.line).toBe(1); // f
+    expect(result?.children?.[1]?.line).toBe(1); // (
+    expect(result?.children?.[3]?.line).toBe(2); // x
+    expect(result?.children?.[7]?.line).toBe(3); // y
+    expect(result?.children?.[11]?.line).toBe(4); // z
+    expect(result?.children?.[14]?.line).toBe(5); // )
+  });
+
+  test("should parse multi-line compound term with comments", () => {
+    const state: ParserState = createParserState(
+      datasetLexer("pred(\n  a,\n  % comment\n  b %inline comment\n  ,c\n)"),
+      "DATASET"
+    );
+
+    const [result] = parseCompoundTerm(state);
+    expect(result).not.toBeNull();
+    expect(result?.type).toBe("COMPOUND_TERM");
+    expect(result?.content).toBe(
+      "pred(\n  a,\n  % comment\n  b %inline comment\n  ,c\n)"
+    );
+    expect(result?.line).toBe(1);
+    expect(result?.endLine).toBe(6);
+
+    // Verify comments are preserved and on correct lines
+    const children = result?.children;
+    expect(
+      children?.some(
+        (child) =>
+          child.type === "COMMENT" &&
+          child.line === 3 &&
+          child.content === "% comment"
+      )
+    ).toBe(true);
+
+    // Check the inline comment
+    const inlineCommentLine = children?.find(
+      (child) => child.type === "TERM" && child.line === 4
+    );
+    expect(inlineCommentLine?.content).toBe("b");
+    const inlineComment = children?.find(
+      (child) =>
+        child.type === "COMMENT" &&
+        child.line === 4 &&
+        child.content === "%inline comment"
+    );
+    expect(inlineComment).not.toBeNull();
+  });
 });

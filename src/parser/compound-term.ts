@@ -1,5 +1,9 @@
 import type { ParserState, RulesetParserObject } from "../types";
-import { getLastNonWhitespaceOrCommentObject } from "./_common";
+import {
+  createParserObject,
+  getLastNonWhitespaceOrCommentObject,
+  isWhitespaceOrComment,
+} from "./_common";
 import {
   advance,
   createErrorObjectAndAdvanceToNextLine,
@@ -56,7 +60,7 @@ export function parseCompoundTerm(
       break;
     }
 
-    if (token.type === "WHITESPACE") {
+    if (isWhitespaceOrComment(token)) {
       children.push(token);
       currentState = advance(currentState)[1];
       continue;
@@ -64,6 +68,7 @@ export function parseCompoundTerm(
 
     if (token.type === "CLOSE_PAREN") {
       const lastNonWhitespace = getLastNonWhitespaceOrCommentObject(children);
+
       if (lastNonWhitespace?.type === "COMMA") {
         hasError = true;
         const [errorObject, errorState] = createErrorObjectAndAdvanceToNextLine(
@@ -94,15 +99,11 @@ export function parseCompoundTerm(
   }
 
   return [
-    {
-      type: hasError ? "ERROR" : "COMPOUND_TERM",
-      start: identifier.start,
-      end: children[children.length - 1].end,
-      line: identifier.line,
-      content: children.map((c) => c.content).join(""),
+    createParserObject(
+      "COMPOUND_TERM",
       children,
-      ...(hasError && { errorMessage: "Invalid compound term structure" }),
-    },
+      hasError ? "Invalid compound term structure" : undefined
+    ),
     currentState,
   ];
 }
