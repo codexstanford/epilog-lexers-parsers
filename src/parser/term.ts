@@ -1,4 +1,5 @@
 import type { ParserState, RulesetParserObject } from "../types";
+import { createParserObject } from "./_common";
 import { parseCompoundTerm } from "./compound-term";
 import { parseConstantTerm } from "./constant-term";
 import { parseListTerm } from "./list-term";
@@ -16,49 +17,19 @@ export function parseTerm(
   // Try parsing compound term
   const [compoundResult, compoundState] = parseCompoundTerm(state);
   if (compoundResult) {
-    return [
-      {
-        type: "TERM",
-        start: compoundResult.start,
-        end: compoundResult.end,
-        line: compoundResult.line,
-        content: compoundResult.content,
-        children: [compoundResult],
-      },
-      compoundState,
-    ];
+    return [createParserObject("TERM", [compoundResult]), compoundState];
   }
 
   // Try parsing list term
   const [listResult, listState] = parseListTerm(state);
   if (listResult) {
-    return [
-      {
-        type: "TERM",
-        start: listResult.start,
-        end: listResult.end,
-        line: listResult.line,
-        content: listResult.content,
-        children: [listResult],
-      },
-      listState,
-    ];
+    return [createParserObject("TERM", [listResult]), listState];
   }
 
   // Try parsing constant term
   const [constantResult, constantState] = parseConstantTerm(state);
   if (constantResult) {
-    return [
-      {
-        type: "TERM",
-        start: constantResult.start,
-        end: constantResult.end,
-        line: constantResult.line,
-        content: constantResult.content,
-        children: [constantResult],
-      },
-      constantState,
-    ];
+    return [createParserObject("TERM", [constantResult]), constantState];
   }
 
   return [null, state];

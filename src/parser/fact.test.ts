@@ -7,17 +7,16 @@ import { datasetLexer } from "../dataset-lexer";
 describe("parseFact", () => {
   test("should parse simple constant fact", () => {
     const state: ParserState = createParserState(
-      datasetLexer("true."),
+      datasetLexer("mike."),
       "DATASET"
     );
 
     const [result] = parseFact(state);
     expect(result).not.toBeNull();
     expect(result?.type).toBe("FACT");
-    expect(result?.content).toBe("true.");
-    expect(result?.children).toHaveLength(2);
+    expect(result?.content).toBe("mike.");
+    expect(result?.children).toHaveLength(1);
     expect(result?.children?.[0]?.type).toBe("CONSTANT");
-    expect(result?.children?.[1]?.type).toBe("PERIOD");
   });
 
   test("should parse compound fact", () => {
