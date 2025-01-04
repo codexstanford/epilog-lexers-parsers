@@ -1,7 +1,7 @@
-import { peek, advance } from "./_control-flow";
 import type { ParserState, RulesetParserObject } from "../types";
+import { createParserObject } from "./_common";
+import { advance, peek } from "./_control-flow";
 import { parseCompoundTerm } from "./compound-term";
-import { consumeWhitespaces } from "./_common";
 
 /**
  * Children are as follows:
@@ -52,9 +52,9 @@ export function parseFact(
 
   // Consume whitespaces
 
-  const [whitespaces, newState] = consumeWhitespaces(currentState);
+  /*   const [whitespaces, newState] = consumeWhitespaces(currentState);
   children.push(...whitespaces);
-  currentState = newState;
+  currentState = newState; */
 
   // Parse optional punctuation period
 
@@ -65,15 +65,5 @@ export function parseFact(
     currentState = advance(currentState)[1];
   }
 
-  return [
-    {
-      type: "FACT",
-      start: children[0].start,
-      end: children[children.length - 1].end,
-      line: children[0].line,
-      content: children.map((child) => child.content).join(""),
-      children,
-    },
-    currentState,
-  ];
+  return [createParserObject("FACT", children), currentState];
 }

@@ -1,9 +1,9 @@
-import type { ParserState, RulesetParserObject, RulesetToken } from "../types";
-import { consumeWhitespaces } from "./_common";
+import type { RulesetParserObject, RulesetToken } from "../types";
+import { consumeWhitespacesAndComments } from "./_common";
 import {
+  createErrorObjectAndAdvanceToNextLine,
   createParserState,
   peek,
-  createErrorObjectAndAdvanceToNextLine,
 } from "./_control-flow";
 import { parseFact } from "./fact";
 
@@ -17,7 +17,8 @@ export function parseDataset(tokens: RulesetToken[]): RulesetParserObject {
 
   while (true) {
     // Consume whitespaces before trying to parse a fact
-    const [whitespaces, afterWhitespace] = consumeWhitespaces(currentState);
+    const [whitespaces, afterWhitespace] =
+      consumeWhitespacesAndComments(currentState);
     const hadWhitespace = whitespaces.length > 0;
 
     if (hadWhitespace) {

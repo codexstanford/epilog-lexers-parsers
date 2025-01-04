@@ -14,13 +14,13 @@ export function getLastNonWhitespaceOrCommentObject(
   return null;
 }
 
-export function consumeWhitespaces(
+export function consumeWhitespacesAndComments(
   state: ParserState
 ): [RulesetParserObject[], ParserState] {
   const children: RulesetParserObject[] = [];
   let currentState = state;
 
-  while (peek(currentState)?.type === "WHITESPACE") {
+  while (peek(currentState) && isWhitespaceOrComment(peek(currentState)!)) {
     const [token, newState] = advance(currentState);
 
     if (!token)
