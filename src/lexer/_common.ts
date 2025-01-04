@@ -43,6 +43,7 @@ export function createLexerState(input: string): LexerState {
     input,
     pos: 0,
     line: 1,
+    lineBeganAtPos: 0,
     tokens: [],
   };
 
@@ -57,9 +58,9 @@ export function createToken(
 ): RulesetToken {
   return {
     type,
-    start,
-    end: state.pos,
     line: state.line,
+    start: start - state.lineBeganAtPos,
+    end: state.pos - state.lineBeganAtPos,
     content: state.input.slice(start, state.pos),
     ...(errorMessage && { errorMessage }),
   };

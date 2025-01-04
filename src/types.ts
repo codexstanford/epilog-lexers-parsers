@@ -4,9 +4,9 @@
 
 export interface Base {
   type: string;
+  line: number;
   start: number;
   end: number;
-  line: number;
   content: string;
   errorMessage?: string;
 }
@@ -59,6 +59,7 @@ export interface LexerState {
   input: string;
   pos: number;
   line: number;
+  lineBeganAtPos: number;
   tokens: RulesetToken[];
 }
 

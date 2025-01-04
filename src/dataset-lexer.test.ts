@@ -3,10 +3,6 @@ import { datasetLexer } from "./dataset-lexer";
 import { validateTokenBoundaries } from "./test-utils";
 
 describe("datasetLexer", () => {
-  /* -------------------------------------------------------------------------- */
-  /*                                  Chapter 2                                 */
-  /* -------------------------------------------------------------------------- */
-
   // http://logicprogramming.stanford.edu/notes/chapter_02.html
 
   test("correctly lexes family relationships dataset", () => {
@@ -31,9 +27,10 @@ describe("datasetLexer", () => {
     expect(tokens[4].type).toBe("CONSTANT");
     expect(tokens[4].content).toBe("bob");
     expect(tokens[5].type).toBe("CLOSE_PAREN");
+    expect(tokens[6].type).toBe("WHITESPACE");
+    expect(tokens[6].content).toBe("\n");
 
     // Verify the second fact's tokens as a sample
-    expect(tokens[6].type).toBe("WHITESPACE");
     expect(tokens[7].type).toBe("CONSTANT");
     expect(tokens[7].content).toBe("parent");
     expect(tokens[8].type).toBe("OPEN_PAREN");
@@ -43,18 +40,23 @@ describe("datasetLexer", () => {
     expect(tokens[11].type).toBe("CONSTANT");
     expect(tokens[11].content).toBe("bea");
     expect(tokens[12].type).toBe("CLOSE_PAREN");
+    expect(tokens[13].type).toBe("WHITESPACE");
+    expect(tokens[13].content).toBe("\n");
+
+    // Verify blank line
+    expect(tokens[14].type).toBe("WHITESPACE");
+    expect(tokens[14].content).toBe("\n");
 
     // Verify the third fact's tokens as a sample
-    expect(tokens[13].type).toBe("WHITESPACE");
-    expect(tokens[14].type).toBe("CONSTANT");
-    expect(tokens[14].content).toBe("parent");
-    expect(tokens[15].type).toBe("OPEN_PAREN");
-    expect(tokens[16].type).toBe("CONSTANT");
-    expect(tokens[16].content).toBe("bea");
-    expect(tokens[17].type).toBe("COMMA");
-    expect(tokens[18].type).toBe("CONSTANT");
-    expect(tokens[18].content).toBe("coe");
-    expect(tokens[19].type).toBe("CLOSE_PAREN");
+    expect(tokens[15].type).toBe("CONSTANT");
+    expect(tokens[15].content).toBe("parent");
+    expect(tokens[16].type).toBe("OPEN_PAREN");
+    expect(tokens[17].type).toBe("CONSTANT");
+    expect(tokens[17].content).toBe("bea");
+    expect(tokens[18].type).toBe("COMMA");
+    expect(tokens[19].type).toBe("CONSTANT");
+    expect(tokens[19].content).toBe("coe");
+    expect(tokens[20].type).toBe("CLOSE_PAREN");
   });
 
   test("correctly lexes menu dataset with nested structures", () => {

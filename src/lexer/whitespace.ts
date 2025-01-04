@@ -9,17 +9,14 @@ export function handleWhitespace(state: LexerState): void {
     isWhitespace(state.input[state.pos])
   ) {
     if (state.input[state.pos] === "\n") {
-      if (state.pos > start) {
-        state.tokens.push(createToken(state, "WHITESPACE", start));
-      }
-      state.line++;
       state.pos++;
+      state.tokens.push(createToken(state, "WHITESPACE", start));
+      state.line++;
+      state.lineBeganAtPos = state.pos;
       return;
     }
     state.pos++;
   }
 
-  if (state.pos > start) {
-    state.tokens.push(createToken(state, "WHITESPACE", start));
-  }
+  state.tokens.push(createToken(state, "WHITESPACE", start));
 }
