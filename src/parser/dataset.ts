@@ -1,5 +1,5 @@
 import type { RulesetParserObject, RulesetToken } from "../types";
-import { consumeWhitespacesAndComments } from "./_common";
+import { consumeWhitespacesAndComments, createParserObject } from "./_common";
 import {
   createErrorObjectAndAdvanceToNextLine,
   createParserState,
@@ -52,12 +52,5 @@ export function parseDataset(tokens: RulesetToken[]): RulesetParserObject {
     }
   }
 
-  return {
-    type: "DATASET",
-    start: children.length > 0 ? children[0].start : 0,
-    end: children.length > 0 ? children[children.length - 1].end : 0,
-    line: children.length > 0 ? children[0].line : 1,
-    content: children.map((child) => child.content).join(""),
-    children,
-  };
+  return createParserObject("DATASET", children);
 }

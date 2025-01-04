@@ -38,18 +38,17 @@ export function createParserObject(
   children: RulesetParserObject[],
   errorMsg?: string
 ): RulesetParserObject {
-  const [firstToken] = children;
+  const [firstChild] = children;
+  const lastChild = children[children.length - 1];
 
-  const endLine =
-    children[children.length - 1]?.endLine ??
-    children[children.length - 1].line;
+  const endLine = lastChild ? lastChild.endLine ?? lastChild.line : undefined;
 
   return {
     type: errorMsg ? "ERROR" : type,
-    line: firstToken.line,
-    start: firstToken.start,
-    endLine: firstToken.line === endLine ? undefined : endLine,
-    end: children[children.length - 1].end,
+    line: children.length > 0 ? firstChild.line : 1,
+    start: children.length > 0 ? firstChild.start : 0,
+    end: children.length > 0 ? children[children.length - 1].end : 0,
+    endLine: endLine && firstChild.line !== endLine ? endLine : undefined,
     content: children.map((c) => c.content).join(""),
     children,
     ...(errorMsg && { errorMessage: "Invalid list structure" }),

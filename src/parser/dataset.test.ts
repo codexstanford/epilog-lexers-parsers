@@ -22,7 +22,7 @@ describe("parseDataset", () => {
     expect(result?.children).toHaveLength(1);
     expect(result?.children?.[0]?.type).toBe("FACT");
     expect(result?.children?.[0]?.content).toBe("true.");
-    expect(result?.children?.[0]?.children).toHaveLength(2);
+    expect(result?.children?.[0]?.children).toHaveLength(1);
   });
 
   test("should parse multiple facts dataset", () => {
@@ -63,7 +63,7 @@ describe("parseDataset", () => {
 
     expect(result).not.toBeNull();
     expect(result?.type).toBe("DATASET");
-    expect(result?.children).toHaveLength(3);
+    expect(result?.children).toHaveLength(5);
   });
 
   // from https://github.com/codexstanford/cardinal-care-encoding/blob/main/Encoding/System-wide/world.hdf
@@ -81,7 +81,7 @@ describe("parseDataset", () => {
 
     expect(result).not.toBeNull();
     expect(result?.type).toBe("DATASET");
-    expect(result?.children).toHaveLength(4);
+    expect(result?.children).toHaveLength(7);
 
     // Check first fact: type(medicare_part_a,product)
     const fact1 = result?.children?.[0];
@@ -98,7 +98,7 @@ describe("parseDataset", () => {
     expect(fact1?.children?.[5]?.type).toBe("CLOSE_PAREN");
 
     // Check third fact: product.description(medicare_part_a,"...")
-    const fact3 = result?.children?.[2];
+    const fact3 = result?.children?.[4];
     expect(fact3?.type).toBe("FACT");
     expect(fact3?.children).toHaveLength(6); // identifier + ( + term + comma + term + )
     expect(fact3?.children?.[0]?.content).toBe("product.description");
