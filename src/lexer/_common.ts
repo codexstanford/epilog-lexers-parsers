@@ -26,11 +26,8 @@ export function isConstantStart(char: string): boolean {
   return /[a-z0-9]/.test(char);
 }
 
-// Constants can contain letters, numbers, and underscores
-// They can also contain periods, but only if followed by another constant character
-// This check is done in the handleConstant function
 export function isConstantChar(char: string): boolean {
-  return /[a-z0-9_]/.test(char);
+  return /[a-z0-9_.]/.test(char);
 }
 
 export function isDigit(char: string): boolean {

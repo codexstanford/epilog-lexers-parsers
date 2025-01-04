@@ -7,11 +7,7 @@ export function handleConstant(state: LexerState): void {
   // move pointer to the end of the constant
   while (
     state.pos < state.input.length &&
-    (isConstantChar(state.input[state.pos]) ||
-      // Periods are allowed only if followed by another constant character
-      (state.input[state.pos] === "." &&
-        state.pos + 1 < state.input.length &&
-        isConstantChar(state.input[state.pos + 1])))
+    isConstantChar(state.input[state.pos])
   ) {
     state.pos++;
   }

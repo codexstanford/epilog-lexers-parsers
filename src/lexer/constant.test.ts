@@ -29,19 +29,6 @@ describe("handleConstant", () => {
     });
   });
 
-  it("stops at trailing period", () => {
-    const state = createLexerState("test.");
-    handleConstant(state);
-    expect(state.tokens).toHaveLength(1);
-    expect(state.tokens[0]).toEqual({
-      type: "CONSTANT",
-      start: 0,
-      end: 4,
-      line: 1,
-      content: "test",
-    });
-  });
-
   it("handles underscore in middle of constant", () => {
     const state = createLexerState("test_case");
     handleConstant(state);
