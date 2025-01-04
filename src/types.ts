@@ -5,6 +5,7 @@
 export interface Base {
   type: string;
   line: number;
+  endLine?: number;
   start: number;
   end: number;
   content: string;
@@ -77,6 +78,7 @@ export type DatasetParserObjectType =
   | "COMPOUND_TERM"
   | "LIST_TERM"
   | "SYMBOL_TERM"
+  | "NIL"
   | DatasetTokenType;
 
 export interface DatasetParserObject extends Base {

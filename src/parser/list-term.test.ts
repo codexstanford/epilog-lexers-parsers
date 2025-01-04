@@ -16,6 +16,7 @@ describe("parseListTerm", () => {
     expect(result?.type).toBe("LIST_TERM");
     expect(result?.content).toBe("nil");
     expect(result?.children).toHaveLength(1);
+    expect(result?.children?.[0]?.type).toBe("NIL");
     expect(result?.children?.[0]?.content).toBe("nil");
   });
 
@@ -266,4 +267,63 @@ describe("parseListTerm", () => {
     expect(middleTerm?.children?.[0].children?.[0]?.content).toBe("f");
     expect(middleTerm?.children?.[0].children?.[2]?.content).toBe("y");
   });
+
+  test("should parse multi-line list", () => {
+    const state: ParserState = createParserState(
+      datasetLexer("[\n  x,\n  y,\n  z\n]"),
+      "DATASET"
+    );
+
+    const [result] = parseListTerm(state);
+
+    expect(result).not.toBeNull();
+    expect(result?.type).toBe("LIST_TERM");
+    expect(result?.content).toBe("[\n  x,\n  y,\n  z\n]");
+    expect(result?.line).toBe(1);
+    expect(result?.endLine).toBe(5);
+
+    // Verify children are on correct lines
+    expect(result?.children?.[0]?.line).toBe(1); // [
+    expect(result?.children?.[2]?.line).toBe(2); // x
+    expect(result?.children?.[6]?.line).toBe(3); // y
+    expect(result?.children?.[10]?.line).toBe(4); // z
+    expect(result?.children?.[13]?.line).toBe(5); // ]
+  });
+
+  test("should parse multi-line list with comments", () => {
+    const state: ParserState = createParserState(
+      datasetLexer("[a,\n% comment\nb %comment\n,c]"),
+      "DATASET"
+    );
+
+    const [result] = parseListTerm(state);
+    
+    expect(result).not.toBeNull();
+    expect(result?.type).toBe("LIST_TERM");
+    expect(result?.content).toBe("[a,\n% comment\nb %comment\n,c]");
+    expect(result?.line).toBe(1);
+    expect(result?.endLine).toBe(4);
+
+    // Verify comments are preserved and on correct lines
+    const children = result?.children;
+    expect(children?.some(child => 
+      child.type === "COMMENT" && 
+      child.line === 2 && 
+      child.content === "% comment"
+    )).toBe(true);
+    
+    // Check the inline comment
+    const inlineCommentLine = children?.find(child => 
+      child.type === "TERM" && 
+      child.line === 3
+    );
+    expect(inlineCommentLine?.content).toBe("b");
+    const inlineComment = children?.find(child => 
+      child.type === "COMMENT" && 
+      child.line === 3 && 
+      child.content === "%comment"
+    );
+    expect(inlineComment).not.toBeNull();
+  });
+
 });

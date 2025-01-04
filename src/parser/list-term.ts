@@ -1,5 +1,9 @@
 import type { ParserState, RulesetParserObject } from "../types";
-import { getLastNonWhitespaceObject } from "./_common";
+import {
+  getLastNonWhitespaceOrCommentObject,
+  createParserObject,
+  isWhitespaceOrComment,
+} from "./_common";
 import {
   advance,
   createErrorObjectAndAdvanceToNextLine,
@@ -55,12 +59,9 @@ function parseNilConstant(
   }
 
   const [_, currentState] = advance(state);
+
   return [
-    {
-      ...token,
-      type: "LIST_TERM",
-      children: [token],
-    },
+    createParserObject("LIST_TERM", [createParserObject("NIL", [token])]),
     currentState,
   ];
 }
@@ -95,7 +96,7 @@ function parseBracketedList(
       break;
     }
 
-    if (token.type === "WHITESPACE") {
+    if (isWhitespaceOrComment(token)) {
       children.push(token);
       currentState = advance(currentState)[1];
       continue;
@@ -103,7 +104,7 @@ function parseBracketedList(
 
     if (token.type === "CLOSE_BRACKET") {
       // A close bracket is not allowed directly after a comma
-      const lastNonWhitespace = getLastNonWhitespaceObject(children);
+      const lastNonWhitespace = getLastNonWhitespaceOrCommentObject(children);
       if (lastNonWhitespace?.type === "COMMA") {
         hasError = true;
         const [errorObject, errorState] = createErrorObjectAndAdvanceToNextLine(
@@ -132,15 +133,11 @@ function parseBracketedList(
   }
 
   return [
-    {
-      type: hasError ? "ERROR" : "LIST_TERM",
-      start: firstToken.start,
-      end: children[children.length - 1].end,
-      line: firstToken.line,
-      content: children.map((c) => c.content).join(""),
+    createParserObject(
+      "LIST_TERM",
       children,
-      ...(hasError && { errorMessage: "Invalid list structure" }),
-    },
+      hasError ? "Invalid LIST_TERM" : undefined
+    ),
     currentState,
   ];
 }
@@ -149,7 +146,7 @@ function parseBracketedListElement(
   state: ParserState,
   children: RulesetParserObject[]
 ): [boolean, ParserState] {
-  const lastNonWhitespace = getLastNonWhitespaceObject(children);
+  const lastNonWhitespace = getLastNonWhitespaceOrCommentObject(children);
   if (!lastNonWhitespace) throw Error("Expected at least opening bracket");
 
   const isExpectingTerm =
@@ -172,7 +169,7 @@ function parseTermElement(
   if (!termObject) {
     const [errorObject, errorState] = createErrorObjectAndAdvanceToNextLine(
       newState,
-      `Expected term, but found ${peek(newState)?.type}` // Fixed state reference
+      `Expected term, but found ${peek(newState)?.type}`
     );
 
     children.push(errorObject);

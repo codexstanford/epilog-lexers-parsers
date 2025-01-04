@@ -1,5 +1,5 @@
 import type { ParserState, RulesetParserObject } from "../types";
-import { getLastNonWhitespaceObject } from "./_common";
+import { getLastNonWhitespaceOrCommentObject } from "./_common";
 import {
   advance,
   createErrorObjectAndAdvanceToNextLine,
@@ -63,7 +63,7 @@ export function parseCompoundTerm(
     }
 
     if (token.type === "CLOSE_PAREN") {
-      const lastNonWhitespace = getLastNonWhitespaceObject(children);
+      const lastNonWhitespace = getLastNonWhitespaceOrCommentObject(children);
       if (lastNonWhitespace?.type === "COMMA") {
         hasError = true;
         const [errorObject, errorState] = createErrorObjectAndAdvanceToNextLine(
@@ -111,8 +111,8 @@ function parseCompoundTermElement(
   state: ParserState,
   children: RulesetParserObject[]
 ): [boolean, ParserState] {
-  const lastNonWhitespace = getLastNonWhitespaceObject(children);
-  
+  const lastNonWhitespace = getLastNonWhitespaceOrCommentObject(children);
+
   if (!lastNonWhitespace)
     throw Error("Expected at least constant and opening parenthesis");
 
