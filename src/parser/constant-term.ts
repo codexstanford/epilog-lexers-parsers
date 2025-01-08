@@ -13,7 +13,7 @@ export function parseConstantTerm(
 ): [RulesetParserObject | null, ParserState] {
   const token = peek(state);
 
-  if (!token || !["CONSTANT", "NUMBER", "STRING"].includes(token.type))
+  if (!token || !["SYMBOL_TERM", "NUMBER", "STRING"].includes(token.type))
     return [null, state];
 
   const [_, newState] = advance(state);
@@ -21,7 +21,7 @@ export function parseConstantTerm(
   return [
     {
       ...token,
-      type: "CONSTANT_TERM",
+      type: "SIMPLE_TERM",
       children: [token],
     },
     newState,

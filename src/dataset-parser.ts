@@ -35,10 +35,6 @@ export function datasetParser(tokens: DatasetToken[]): DatasetParserObject {
   };
 }
 
-
-
-
-
 /* -------------------------------------------------------------------------- */
 /*                            Object type specific                            */
 /* -------------------------------------------------------------------------- */
@@ -70,7 +66,7 @@ function parseFact(
   // TODO number wasn't specified as possible dataset token type
   // TODO we might need to return an error object if condition is met
   // Check if first token is valid fact identifier
-  if (!["CONSTANT", "NUMBER", "STRING"].includes(firstToken.type)) {
+  if (!["SYMBOL_TERM", "NUMBER", "STRING"].includes(firstToken.type)) {
     return [null, state];
   }
 
@@ -105,7 +101,7 @@ function parseFact(
       const argToken = peek(currentState);
       if (!argToken) break;
 
-      if (["CONSTANT", "NUMBER", "STRING"].includes(argToken.type)) {
+      if (["SYMBOL_TERM", "NUMBER", "STRING"].includes(argToken.type)) {
         const [arg, state3] = advance(currentState);
         currentState = state3;
         children.push({

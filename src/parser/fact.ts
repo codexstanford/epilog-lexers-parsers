@@ -37,7 +37,7 @@ export function parseFact(
     }
 
     if (
-      nextToken.type === "CONSTANT" ||
+      nextToken.type === "SYMBOL_TERM" ||
       nextToken.type === "NUMBER" ||
       nextToken.type === "STRING"
     ) {

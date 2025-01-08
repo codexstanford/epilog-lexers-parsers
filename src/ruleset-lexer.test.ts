@@ -8,7 +8,7 @@ describe("rulesetLexer", () => {
     const tokens = rulesetLexer(input);
     validateTokenBoundaries(input, tokens);
 
-    expect(tokens[0].type).toBe("CONSTANT");
+    expect(tokens[0].type).toBe("SYMBOL_TERM");
     expect(tokens[1].type).toBe("OPEN_PAREN");
     expect(tokens[2].type).toBe("VARIABLE_NAMED");
     expect(tokens[2].content).toBe("Person");
@@ -24,7 +24,7 @@ describe("rulesetLexer", () => {
     const tokens = rulesetLexer(input);
     validateTokenBoundaries(input, tokens);
 
-    expect(tokens[0].type).toBe("CONSTANT");
+    expect(tokens[0].type).toBe("SYMBOL_TERM");
     expect(tokens[0].content).toBe("parent");
     expect(tokens[1].type).toBe("OPEN_PAREN");
     expect(tokens[1].content).toBe("(");
@@ -45,7 +45,7 @@ describe("rulesetLexer", () => {
     const tokens = rulesetLexer(input);
     validateTokenBoundaries(input, tokens);
 
-    expect(tokens[0].type).toBe("CONSTANT");
+    expect(tokens[0].type).toBe("SYMBOL_TERM");
     expect(tokens[0].content).toBe("grandparent");
     expect(tokens[1].type).toBe("OPEN_PAREN");
     expect(tokens[1].content).toBe("(");
@@ -65,7 +65,7 @@ describe("rulesetLexer", () => {
     expect(tokens[8].content).toBe(":-");
     expect(tokens[9].type).toBe("WHITESPACE");
     expect(tokens[9].content).toBe(" ");
-    expect(tokens[10].type).toBe("CONSTANT");
+    expect(tokens[10].type).toBe("SYMBOL_TERM");
     expect(tokens[10].content).toBe("parent");
     expect(tokens[11].type).toBe("OPEN_PAREN");
     expect(tokens[11].content).toBe("(");
@@ -85,7 +85,7 @@ describe("rulesetLexer", () => {
     expect(tokens[18].content).toBe("&");
     expect(tokens[19].type).toBe("WHITESPACE");
     expect(tokens[19].content).toBe(" ");
-    expect(tokens[20].type).toBe("CONSTANT");
+    expect(tokens[20].type).toBe("SYMBOL_TERM");
     expect(tokens[20].content).toBe("parent");
     expect(tokens[21].type).toBe("OPEN_PAREN");
     expect(tokens[21].content).toBe("(");
@@ -110,7 +110,7 @@ describe("rulesetLexer", () => {
 
     expect(tokens[0].type).toBe("NEGATION_SYMBOL");
     expect(tokens[0].content).toBe("~");
-    expect(tokens[1].type).toBe("CONSTANT");
+    expect(tokens[1].type).toBe("SYMBOL_TERM");
     expect(tokens[1].content).toBe("foo");
     expect(tokens[2].type).toBe("OPEN_PAREN");
     expect(tokens[2].content).toBe("(");
@@ -124,7 +124,7 @@ describe("rulesetLexer", () => {
     expect(tokens[6].content).toBe("&");
     expect(tokens[7].type).toBe("WHITESPACE");
     expect(tokens[7].content).toBe(" ");
-    expect(tokens[8].type).toBe("CONSTANT");
+    expect(tokens[8].type).toBe("SYMBOL_TERM");
     expect(tokens[8].content).toBe("bar");
     expect(tokens[9].type).toBe("OPEN_PAREN");
     expect(tokens[9].content).toBe("(");
@@ -139,7 +139,7 @@ describe("rulesetLexer", () => {
     const tokens = rulesetLexer(input);
     validateTokenBoundaries(input, tokens);
 
-    expect(tokens[0].type).toBe("CONSTANT");
+    expect(tokens[0].type).toBe("SYMBOL_TERM");
     expect(tokens[0].content).toBe("foo");
     expect(tokens[1].type).toBe("OPEN_PAREN");
     expect(tokens[1].content).toBe("(");
@@ -153,7 +153,7 @@ describe("rulesetLexer", () => {
     expect(tokens[5].content).toBe(":=");
     expect(tokens[6].type).toBe("WHITESPACE");
     expect(tokens[6].content).toBe(" ");
-    expect(tokens[7].type).toBe("CONSTANT");
+    expect(tokens[7].type).toBe("SYMBOL_TERM");
     expect(tokens[7].content).toBe("bar");
     expect(tokens[8].type).toBe("OPEN_PAREN");
     expect(tokens[8].content).toBe("(");

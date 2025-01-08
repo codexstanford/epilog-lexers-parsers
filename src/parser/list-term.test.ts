@@ -49,7 +49,7 @@ describe("parseListTerm", () => {
     expect(result?.children?.[0]?.content).toBe("[");
     expect(result?.children?.[1]?.type).toBe("TERM");
     expect(result?.children?.[1]?.content).toBe("x");
-    expect(result?.children?.[1]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[1]?.children?.[0].type).toBe("SIMPLE_TERM");
     expect(result?.children?.[1]?.children?.[0].content).toBe("x");
     expect(result?.children?.[2]?.type).toBe("CLOSE_BRACKET");
     expect(result?.children?.[2]?.content).toBe("]");
@@ -70,13 +70,13 @@ describe("parseListTerm", () => {
     expect(result?.children?.[0]?.content).toBe("[");
     expect(result?.children?.[1]?.type).toBe("TERM");
     expect(result?.children?.[1]?.content).toBe("x");
-    expect(result?.children?.[1]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[1]?.children?.[0].type).toBe("SIMPLE_TERM");
     expect(result?.children?.[1]?.children?.[0].content).toBe("x");
     expect(result?.children?.[2]?.type).toBe("COMMA");
     expect(result?.children?.[2]?.content).toBe(",");
     expect(result?.children?.[3]?.type).toBe("TERM");
     expect(result?.children?.[3]?.content).toBe("y");
-    expect(result?.children?.[3]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[3]?.children?.[0].type).toBe("SIMPLE_TERM");
     expect(result?.children?.[3]?.children?.[0].content).toBe("y");
     expect(result?.children?.[4]?.type).toBe("CLOSE_BRACKET");
     expect(result?.children?.[4]?.content).toBe("]");
@@ -96,7 +96,7 @@ describe("parseListTerm", () => {
     expect(result?.children?.[0]?.type).toBe("OPEN_BRACKET");
     expect(result?.children?.[0]?.content).toBe("[");
     expect(result?.children?.[1]?.type).toBe("TERM");
-    expect(result?.children?.[1]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[1]?.children?.[0].type).toBe("SIMPLE_TERM");
     expect(result?.children?.[1]?.children?.[0].content).toBe("x");
     expect(result?.children?.[2]?.type).toBe("WHITESPACE");
     expect(result?.children?.[2]?.content).toBe(" ");
@@ -105,7 +105,7 @@ describe("parseListTerm", () => {
     expect(result?.children?.[4]?.type).toBe("WHITESPACE");
     expect(result?.children?.[4]?.content).toBe(" ");
     expect(result?.children?.[5]?.type).toBe("TERM");
-    expect(result?.children?.[5]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[5]?.children?.[0].type).toBe("SIMPLE_TERM");
     expect(result?.children?.[5]?.children?.[0].content).toBe("y");
     expect(result?.children?.[6]?.type).toBe("CLOSE_BRACKET");
     expect(result?.children?.[6]?.content).toBe("]");
@@ -124,7 +124,7 @@ describe("parseListTerm", () => {
     expect(result?.children).toHaveLength(5);
     expect(result?.children?.[0]?.type).toBe("OPEN_BRACKET");
     expect(result?.children?.[1]?.type).toBe("TERM");
-    expect(result?.children?.[1]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[1]?.children?.[0].type).toBe("SIMPLE_TERM");
     expect(result?.children?.[1]?.children?.[0].content).toBe("x");
     expect(result?.children?.[2]?.type).toBe("COMMA");
     expect(result?.children?.[2]?.content).toBe(",");
@@ -242,7 +242,7 @@ describe("parseListTerm", () => {
     expect(level5?.children).toHaveLength(3);
     expect(level5?.children?.[0]?.type).toBe("OPEN_BRACKET");
     expect(level5?.children?.[1]?.type).toBe("TERM");
-    expect(level5?.children?.[1]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(level5?.children?.[1]?.children?.[0].type).toBe("SIMPLE_TERM");
     expect(level5?.children?.[1]?.children?.[0].content).toBe("x");
     expect(level5?.children?.[2]?.type).toBe("CLOSE_BRACKET");
   });
@@ -297,7 +297,7 @@ describe("parseListTerm", () => {
     );
 
     const [result] = parseListTerm(state);
-    
+
     expect(result).not.toBeNull();
     expect(result?.type).toBe("LIST_TERM");
     expect(result?.content).toBe("[a,\n% comment\nb %comment\n,c]");
@@ -306,24 +306,26 @@ describe("parseListTerm", () => {
 
     // Verify comments are preserved and on correct lines
     const children = result?.children;
-    expect(children?.some(child => 
-      child.type === "COMMENT" && 
-      child.line === 2 && 
-      child.content === "% comment"
-    )).toBe(true);
-    
+    expect(
+      children?.some(
+        (child) =>
+          child.type === "COMMENT" &&
+          child.line === 2 &&
+          child.content === "% comment"
+      )
+    ).toBe(true);
+
     // Check the inline comment
-    const inlineCommentLine = children?.find(child => 
-      child.type === "TERM" && 
-      child.line === 3
+    const inlineCommentLine = children?.find(
+      (child) => child.type === "TERM" && child.line === 3
     );
     expect(inlineCommentLine?.content).toBe("b");
-    const inlineComment = children?.find(child => 
-      child.type === "COMMENT" && 
-      child.line === 3 && 
-      child.content === "%comment"
+    const inlineComment = children?.find(
+      (child) =>
+        child.type === "COMMENT" &&
+        child.line === 3 &&
+        child.content === "%comment"
     );
     expect(inlineComment).not.toBeNull();
   });
-
 });

@@ -28,7 +28,7 @@ export function parseCompoundTerm(
   state: ParserState
 ): [RulesetParserObject | null, ParserState] {
   const identifier = peek(state);
-  if (!identifier || identifier.type !== "CONSTANT") return [null, state];
+  if (!identifier || identifier.type !== "SYMBOL_TERM") return [null, state];
 
   const children: RulesetParserObject[] = [identifier];
   let currentState = advance(state)[1];

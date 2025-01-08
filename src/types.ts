@@ -20,7 +20,7 @@ export interface Base {
 
 export type DatasetTokenType =
   | "WHITESPACE"
-  | "CONSTANT"
+  | "SYMBOL_TERM"
   | "STRING"
   | "NUMBER"
   | "COMMENT"
@@ -74,7 +74,7 @@ export type DatasetParserObjectType =
   | "DATASET"
   | "FACT"
   | "TERM"
-  | "CONSTANT_TERM"
+  | "SIMPLE_TERM"
   | "COMPOUND_TERM"
   | "LIST_TERM"
   | "SYMBOL_TERM"

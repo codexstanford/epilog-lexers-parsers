@@ -11,12 +11,14 @@ describe("parseConstantTerm", () => {
     const [result, newState] = parseConstantTerm(state);
 
     expect(result).toEqual({
-      type: "CONSTANT_TERM",
+      type: "SIMPLE_TERM",
       start: 0,
       end: 1,
       line: 1,
       content: "x",
-      children: [{ type: "CONSTANT", start: 0, end: 1, line: 1, content: "x" }],
+      children: [
+        { type: "SYMBOL_TERM", start: 0, end: 1, line: 1, content: "x" },
+      ],
     } satisfies RulesetParserObject);
 
     expect(newState.current).toBe(1);
@@ -28,7 +30,7 @@ describe("parseConstantTerm", () => {
     const [result, newState] = parseConstantTerm(state);
 
     expect(result).toEqual({
-      type: "CONSTANT_TERM",
+      type: "SIMPLE_TERM",
       start: 0,
       end: 2,
       line: 1,
@@ -45,7 +47,7 @@ describe("parseConstantTerm", () => {
     const [result, newState] = parseConstantTerm(state);
 
     expect(result).toEqual({
-      type: "CONSTANT_TERM",
+      type: "SIMPLE_TERM",
       start: 0,
       end: 7,
       line: 1,

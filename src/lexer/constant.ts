@@ -24,5 +24,5 @@ export function handleConstant(state: LexerState): void {
     return;
   }
 
-  state.tokens.push(createToken(state, "CONSTANT", start));
+  state.tokens.push(createToken(state, "SYMBOL_TERM", start));
 }

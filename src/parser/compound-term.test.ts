@@ -16,12 +16,12 @@ describe("parseCompoundTerm", () => {
     expect(result?.type).toBe("COMPOUND_TERM");
     expect(result?.content).toBe("f(x)");
     expect(result?.children).toHaveLength(4);
-    expect(result?.children?.[0]?.type).toBe("CONSTANT");
+    expect(result?.children?.[0]?.type).toBe("SYMBOL_TERM");
     expect(result?.children?.[0]?.content).toBe("f");
     expect(result?.children?.[1]?.type).toBe("OPEN_PAREN");
     expect(result?.children?.[2]?.type).toBe("TERM");
     expect(result?.children?.[2]?.content).toBe("x");
-    expect(result?.children?.[2]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[2]?.children?.[0].type).toBe("SIMPLE_TERM");
     expect(result?.children?.[2]?.children?.[0].content).toBe("x");
     expect(result?.children?.[3]?.type).toBe("CLOSE_PAREN");
   });
@@ -37,14 +37,14 @@ describe("parseCompoundTerm", () => {
     expect(result?.type).toBe("COMPOUND_TERM");
     expect(result?.content).toBe("pred(x,y)");
     expect(result?.children).toHaveLength(6);
-    expect(result?.children?.[0]?.type).toBe("CONSTANT");
+    expect(result?.children?.[0]?.type).toBe("SYMBOL_TERM");
     expect(result?.children?.[1]?.type).toBe("OPEN_PAREN");
     expect(result?.children?.[2]?.type).toBe("TERM");
-    expect(result?.children?.[2]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[2]?.children?.[0].type).toBe("SIMPLE_TERM");
     expect(result?.children?.[2]?.children?.[0].content).toBe("x");
     expect(result?.children?.[3]?.type).toBe("COMMA");
     expect(result?.children?.[4]?.type).toBe("TERM");
-    expect(result?.children?.[4]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(result?.children?.[4]?.children?.[0].type).toBe("SIMPLE_TERM");
     expect(result?.children?.[4]?.children?.[0].content).toBe("y");
     expect(result?.children?.[5]?.type).toBe("CLOSE_PAREN");
   });
@@ -166,7 +166,7 @@ describe("parseCompoundTerm", () => {
     // Check innermost level
     expect(level4?.children?.[2]?.type).toBe("TERM");
     const level5 = level4?.children?.[2]?.children?.[0];
-    expect(level5?.type).toBe("CONSTANT_TERM");
+    expect(level5?.type).toBe("SIMPLE_TERM");
     expect(level5?.content).toBe("x");
   });
 

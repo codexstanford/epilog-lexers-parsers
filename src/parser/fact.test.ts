@@ -16,7 +16,7 @@ describe("parseFact", () => {
     expect(result?.type).toBe("FACT");
     expect(result?.content).toBe("mike.");
     expect(result?.children).toHaveLength(1);
-    expect(result?.children?.[0]?.type).toBe("CONSTANT");
+    expect(result?.children?.[0]?.type).toBe("SYMBOL_TERM");
   });
 
   test("should parse compound fact", () => {
@@ -80,7 +80,7 @@ describe("parseFact", () => {
     expect(result).not.toBeNull();
     expect(result?.type).toBe("FACT");
     expect(result?.children).toHaveLength(9);
-    expect(result?.children?.[0]?.type).toBe("CONSTANT");
+    expect(result?.children?.[0]?.type).toBe("SYMBOL_TERM");
     expect(result?.children?.[result.children.length - 2]?.type).toBe(
       "WHITESPACE"
     );
@@ -113,7 +113,7 @@ describe("parseFact", () => {
     const [result] = parseFact(state);
     expect(result).not.toBeNull();
     expect(result?.type).toBe("FACT");
-    expect(result?.children?.[0]?.type).toBe("CONSTANT");
+    expect(result?.children?.[0]?.type).toBe("SYMBOL_TERM");
     expect(result?.children?.[1]?.type).toBe("OPEN_PAREN");
     expect(result?.children?.[2]?.type).toBe("TERM");
     expect(result?.children?.[3]?.type).toBe("COMMA");
@@ -123,12 +123,10 @@ describe("parseFact", () => {
     expect(result?.children?.[7]?.type).toBe("PERIOD");
 
     const compoundTerm = result?.children?.[5].children?.[0];
-    expect(compoundTerm?.children?.[0]?.type).toBe("CONSTANT");
+    expect(compoundTerm?.children?.[0]?.type).toBe("SYMBOL_TERM");
     expect(compoundTerm?.children?.[1]?.type).toBe("OPEN_PAREN");
     expect(compoundTerm?.children?.[2]?.type).toBe("TERM");
-    expect(compoundTerm?.children?.[2]?.children?.[0].type).toBe(
-      "CONSTANT_TERM"
-    );
+    expect(compoundTerm?.children?.[2]?.children?.[0].type).toBe("SIMPLE_TERM");
     expect(compoundTerm?.children?.[3]?.type).toBe("CLOSE_PAREN");
   });
 });

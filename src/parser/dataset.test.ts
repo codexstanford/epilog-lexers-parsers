@@ -87,7 +87,7 @@ describe("parseDataset", () => {
     const fact1 = result?.children?.[0];
     expect(fact1?.type).toBe("FACT");
     expect(fact1?.children).toHaveLength(6); // identifier + ( + term + comma + term + )
-    expect(fact1?.children?.[0]?.type).toBe("CONSTANT");
+    expect(fact1?.children?.[0]?.type).toBe("SYMBOL_TERM");
     expect(fact1?.children?.[0]?.content).toBe("type");
     expect(fact1?.children?.[1]?.type).toBe("OPEN_PAREN");
     expect(fact1?.children?.[2]?.type).toBe("TERM");
@@ -102,7 +102,7 @@ describe("parseDataset", () => {
     expect(fact3?.type).toBe("FACT");
     expect(fact3?.children).toHaveLength(6); // identifier + ( + term + comma + term + )
     expect(fact3?.children?.[0]?.content).toBe("product.description");
-    expect(fact3?.children?.[0]?.type).toBe("CONSTANT");
+    expect(fact3?.children?.[0]?.type).toBe("SYMBOL_TERM");
     expect(fact3?.children?.[1]?.type).toBe("OPEN_PAREN");
     expect(fact3?.children?.[2]?.type).toBe("TERM");
     expect(fact3?.children?.[2]?.content).toBe("medicare_part_a");
@@ -111,7 +111,7 @@ describe("parseDataset", () => {
     expect(fact3?.children?.[4]?.content).toBe(
       '"https://www.medicare.gov/coverage/inpatient-hospital-care"'
     );
-    expect(fact3?.children?.[4]?.children?.[0].type).toBe("CONSTANT_TERM");
+    expect(fact3?.children?.[4]?.children?.[0].type).toBe("SIMPLE_TERM");
     expect(fact3?.children?.[4]?.children?.[0].children?.[0].type).toBe(
       "STRING"
     );

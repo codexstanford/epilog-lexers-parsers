@@ -54,7 +54,7 @@ function parseNilConstant(
   state: ParserState
 ): [RulesetParserObject | null, ParserState] {
   const token = peek(state);
-  if (!token || token.type !== "CONSTANT" || token.content !== "nil") {
+  if (!token || token.type !== "SYMBOL_TERM" || token.content !== "nil") {
     return [null, state];
   }
 

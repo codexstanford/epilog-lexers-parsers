@@ -8,7 +8,7 @@ describe("handleConstant", () => {
     handleConstant(state);
     expect(state.tokens).toHaveLength(1);
     expect(state.tokens[0]).toEqual({
-      type: "CONSTANT",
+      type: "SYMBOL_TERM",
       start: 0,
       end: 4,
       line: 1,
@@ -21,7 +21,7 @@ describe("handleConstant", () => {
     handleConstant(state);
     expect(state.tokens).toHaveLength(1);
     expect(state.tokens[0]).toEqual({
-      type: "CONSTANT",
+      type: "SYMBOL_TERM",
       start: 0,
       end: 9,
       line: 1,
@@ -34,7 +34,7 @@ describe("handleConstant", () => {
     handleConstant(state);
     expect(state.tokens).toHaveLength(1);
     expect(state.tokens[0]).toEqual({
-      type: "CONSTANT",
+      type: "SYMBOL_TERM",
       start: 0,
       end: 9,
       line: 1,
