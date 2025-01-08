@@ -1,9 +1,11 @@
 import { describe, expect, it } from "bun:test";
 import { rulesetLexer } from "./ruleset-lexer";
+import { validateTokenBoundaries } from "./test-utils";
 
 describe("rulesetLexer", () => {
   it("handles rule separator/neck operator (:-)", () => {
-    const tokens = rulesetLexer("pred(A) :- p(A), q(A).");
+    const input = "pred(A) :- p(A), q(A).";
+    const tokens = rulesetLexer(input);
     expect(tokens).toEqual([
       { type: "SYMBOL_TERM", start: 0, end: 4, line: 1, content: "pred" },
       { type: "OPEN_PAREN", start: 4, end: 5, line: 1, content: "(" },
@@ -30,10 +32,12 @@ describe("rulesetLexer", () => {
       { type: "CLOSE_PAREN", start: 20, end: 21, line: 1, content: ")" },
       { type: "PERIOD", start: 21, end: 22, line: 1, content: "." },
     ]);
+    validateTokenBoundaries(input, tokens);
   });
 
   it("handles double-colon operator (::)", () => {
-    const tokens = rulesetLexer("type :: predicate.");
+    const input = "type :: predicate.";
+    const tokens = rulesetLexer(input);
     expect(tokens).toEqual([
       { type: "SYMBOL_TERM", start: 0, end: 4, line: 1, content: "type" },
       { type: "WHITESPACE", start: 4, end: 5, line: 1, content: " " },
@@ -47,10 +51,12 @@ describe("rulesetLexer", () => {
         content: "predicate.",
       },
     ]);
+    validateTokenBoundaries(input, tokens);
   });
 
   it("handles definition separator operator (:=)", () => {
-    const tokens = rulesetLexer("func(X) := value.");
+    const input = "func(X) := value.";
+    const tokens = rulesetLexer(input);
     expect(tokens).toEqual([
       { type: "SYMBOL_TERM", start: 0, end: 4, line: 1, content: "func" },
       { type: "OPEN_PAREN", start: 4, end: 5, line: 1, content: "(" },
@@ -67,10 +73,12 @@ describe("rulesetLexer", () => {
       { type: "WHITESPACE", start: 10, end: 11, line: 1, content: " " },
       { type: "SYMBOL_TERM", start: 11, end: 17, line: 1, content: "value." },
     ]);
+    validateTokenBoundaries(input, tokens);
   });
 
   it("handles double-arrow operator (==>)", () => {
-    const tokens = rulesetLexer("if(X) ==> then(X).");
+    const input = "if(X) ==> then(X).";
+    const tokens = rulesetLexer(input);
     expect(tokens).toEqual([
       { type: "SYMBOL_TERM", start: 0, end: 2, line: 1, content: "if" },
       { type: "OPEN_PAREN", start: 2, end: 3, line: 1, content: "(" },
@@ -85,12 +93,12 @@ describe("rulesetLexer", () => {
       { type: "CLOSE_PAREN", start: 16, end: 17, line: 1, content: ")" },
       { type: "PERIOD", start: 17, end: 18, line: 1, content: "." },
     ]);
+    validateTokenBoundaries(input, tokens);
   });
 
   it("handles complex rule with multiple operators", () => {
-    const tokens = rulesetLexer(
-      "type::pred(A) :- p(A), q(A) ==> result := value."
-    );
+    const input = "type::pred(A) :- p(A), q(A) ==> result := value.";
+    const tokens = rulesetLexer(input);
     expect(tokens.map((t) => t.type)).toEqual([
       "SYMBOL_TERM",
       "DOUBLE_COLON",
@@ -120,5 +128,6 @@ describe("rulesetLexer", () => {
       "WHITESPACE",
       "SYMBOL_TERM",
     ]);
+    validateTokenBoundaries(input, tokens);
   });
 });
