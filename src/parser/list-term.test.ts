@@ -3,6 +3,7 @@ import type { ParserState } from "../types";
 import { parseListTerm } from "./list-term";
 import { createParserState } from "./_control-flow";
 import { datasetLexer } from "../dataset-lexer";
+import { rulesetLexer } from "../ruleset-lexer";
 
 describe("parseListTerm", () => {
   test("should parse nil constant", () => {
@@ -327,5 +328,98 @@ describe("parseListTerm", () => {
         child.content === "%comment"
     );
     expect(inlineComment).not.toBeNull();
+  });
+
+  test("should parse list with anonymous variables in RULESET mode", () => {
+    const state: ParserState = createParserState(
+      rulesetLexer("[_, [a, _]]"),
+      "RULESET"
+    );
+
+    const [result] = parseListTerm(state);
+    expect(result).not.toBeNull();
+    expect(result?.type).toBe("LIST_TERM");
+    expect(result?.content).toBe("[_, [a, _]]");
+
+    // Check first anonymous variable
+    const firstVar = result?.children?.[1];
+    expect(firstVar?.type).toBe("TERM");
+    expect(firstVar?.children?.[0].type).toBe("VARIABLE");
+    expect(firstVar?.children?.[0].children?.[0].type).toBe(
+      "VARIABLE_ANONYMOUS"
+    );
+
+    // Check nested list with anonymous variable
+    const nestedList = result?.children?.[4]?.children?.[0];
+    expect(nestedList?.type).toBe("LIST_TERM");
+    const nestedVar = nestedList?.children?.[4]?.children?.[0];
+    expect(nestedVar?.type).toBe("VARIABLE");
+    expect(nestedVar?.children?.[0].type).toBe("VARIABLE_ANONYMOUS");
+  });
+
+  test("should parse list with named variables in RULESET mode", () => {
+    const state: ParserState = createParserState(
+      rulesetLexer("[First, Rest]"),
+      "RULESET"
+    );
+
+    const [result] = parseListTerm(state);
+    expect(result).not.toBeNull();
+    expect(result?.type).toBe("LIST_TERM");
+    expect(result?.content).toBe("[First, Rest]");
+
+    // Check first variable
+    const firstVar = result?.children?.[1]?.children?.[0];
+    expect(firstVar?.type).toBe("VARIABLE");
+    expect(firstVar?.children?.[0].type).toBe("VARIABLE_NAMED");
+    expect(firstVar?.children?.[0].content).toBe("First");
+
+    // Check second variable
+    const restVar = result?.children?.[4]?.children?.[0];
+    expect(restVar?.type).toBe("VARIABLE");
+    expect(restVar?.children?.[0].type).toBe("VARIABLE_NAMED");
+    expect(restVar?.children?.[0].content).toBe("Rest");
+  });
+
+  test("should parse list with mixed variables and terms in RULESET mode", () => {
+    const state: ParserState = createParserState(
+      rulesetLexer("[X, _, y, Z]"),
+      "RULESET"
+    );
+
+    const [result] = parseListTerm(state);
+    expect(result).not.toBeNull();
+    expect(result?.type).toBe("LIST_TERM");
+    expect(result?.content).toBe("[X, _, y, Z]");
+
+    const terms = result?.children?.filter((child) => child.type === "TERM");
+    expect(terms).toHaveLength(4);
+
+    // Check first named variable
+    expect(terms?.[0]?.children?.[0].type).toBe("VARIABLE");
+    expect(terms?.[0]?.children?.[0].children?.[0].type).toBe("VARIABLE_NAMED");
+
+    // Check anonymous variable
+    expect(terms?.[1]?.children?.[0].type).toBe("VARIABLE");
+    expect(terms?.[1]?.children?.[0].children?.[0].type).toBe(
+      "VARIABLE_ANONYMOUS"
+    );
+
+    // Check constant term
+    expect(terms?.[2]?.children?.[0].type).toBe("SIMPLE_TERM");
+
+    // Check last named variable
+    expect(terms?.[3]?.children?.[0].type).toBe("VARIABLE");
+    expect(terms?.[3]?.children?.[0].children?.[0].type).toBe("VARIABLE_NAMED");
+  });
+
+  test("should not parse variables in lists in DATASET mode", () => {
+    const state: ParserState = createParserState(
+      datasetLexer("[X]"),
+      "DATASET"
+    );
+
+    const [result] = parseListTerm(state);
+    expect(result?.type).toBe("ERROR");
   });
 });

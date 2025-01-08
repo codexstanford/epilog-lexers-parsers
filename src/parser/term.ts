@@ -3,12 +3,14 @@ import { createParserObject } from "./_common";
 import { parseCompoundTerm } from "./compound-term";
 import { parseConstantTerm } from "./constant-term";
 import { parseListTerm } from "./list-term";
+import { parseVariable } from "./variable";
 
 /**
  * Child is one of the following:
  * - constant term
  * - compound term
  * - list term
+ * - variable (if allowed)
  * @param state
  */
 export function parseTerm(
@@ -30,6 +32,14 @@ export function parseTerm(
   const [constantResult, constantState] = parseConstantTerm(state);
   if (constantResult) {
     return [createParserObject("TERM", [constantResult]), constantState];
+  }
+
+  if (state.setType === "DATASET") return [null, state];
+
+  // Try parsing variable
+  const [variableResult, variableState] = parseVariable(state);
+  if (variableResult) {
+    return [createParserObject("TERM", [variableResult]), variableState];
   }
 
   return [null, state];

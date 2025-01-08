@@ -3,6 +3,7 @@ import type { ParserState } from "../types";
 import { parseCompoundTerm } from "./compound-term";
 import { createParserState } from "./_control-flow";
 import { datasetLexer } from "../dataset-lexer";
+import { rulesetLexer } from "../ruleset-lexer";
 
 describe("parseCompoundTerm", () => {
   test("should parse compound term with single argument", () => {
@@ -257,5 +258,65 @@ describe("parseCompoundTerm", () => {
         child.content === "%inline comment"
     );
     expect(inlineComment).not.toBeNull();
+  });
+
+  test("should parse compound term with anonymous variables in RULESET mode", () => {
+    const state: ParserState = createParserState(
+      rulesetLexer("f(_, g(_))"),
+      "RULESET"
+    );
+
+    const [result] = parseCompoundTerm(state);
+
+    expect(result).not.toBeNull();
+    expect(result?.type).toBe("COMPOUND_TERM");
+    expect(result?.content).toBe("f(_, g(_))");
+
+    // Check first anonymous variable
+    const firstArg = result?.children?.[2];
+    expect(firstArg?.type).toBe("TERM");
+    expect(firstArg?.children?.[0].type).toBe("VARIABLE");
+    expect(firstArg?.children?.[0].children?.[0].type).toBe(
+      "VARIABLE_ANONYMOUS"
+    );
+
+    // Check nested compound term with anonymous variable
+    const nestedTerm = result?.children?.[5]?.children?.[0];
+    expect(nestedTerm?.type).toBe("COMPOUND_TERM");
+    const nestedVar = nestedTerm?.children?.[2]?.children?.[0];
+    expect(nestedVar?.type).toBe("VARIABLE");
+    expect(nestedVar?.children?.[0].type).toBe("VARIABLE_ANONYMOUS");
+  });
+
+  test("should parse compound term with named variables in RULESET mode", () => {
+    const state: ParserState = createParserState(
+      rulesetLexer("pred(X, Y, f(Z))"),
+      "RULESET"
+    );
+
+    const [result] = parseCompoundTerm(state);
+
+    expect(result).not.toBeNull();
+    expect(result?.type).toBe("COMPOUND_TERM");
+    expect(result?.content).toBe("pred(X, Y, f(Z))");
+
+    // Check named variables
+    const args = result?.children?.filter((child) => child.type === "TERM");
+    args?.forEach((arg) => {
+      const term = arg.children?.[0];
+      if (term && term.type === "VARIABLE") {
+        expect(term.children?.[0].type).toBe("VARIABLE_NAMED");
+      }
+    });
+  });
+
+  test("should not parse variables in DATASET mode", () => {
+    const state: ParserState = createParserState(
+      datasetLexer("f(X)"),
+      "DATASET"
+    );
+
+    const [result] = parseCompoundTerm(state);
+    expect(result?.type).toBe("ERROR");
   });
 });
