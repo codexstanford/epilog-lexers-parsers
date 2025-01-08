@@ -13,7 +13,7 @@ import { parseTerm } from "./term";
 
 /**
  * Children are as follows:
- * - constant term
+ * - symbol term
  * - open paren
  * - one or more comma-separated terms, i.e.
  *   - term

@@ -1,7 +1,7 @@
 import type { ParserState, RulesetParserObject } from "../types";
 import { createParserObject } from "./_common";
 import { parseCompoundTerm } from "./compound-term";
-import { parseConstantTerm } from "./constant-term";
+import { parseSimpleTerm } from "./simple-term";
 import { parseListTerm } from "./list-term";
 import { parseVariable } from "./variable";
 
@@ -29,7 +29,7 @@ export function parseTerm(
   }
 
   // Try parsing constant term
-  const [constantResult, constantState] = parseConstantTerm(state);
+  const [constantResult, constantState] = parseSimpleTerm(state);
   if (constantResult) {
     return [createParserObject("TERM", [constantResult]), constantState];
   }

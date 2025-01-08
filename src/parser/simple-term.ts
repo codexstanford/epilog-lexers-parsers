@@ -8,7 +8,7 @@ import type { ParserState, RulesetParserObject } from "../types";
  * - string
  * @param state
  */
-export function parseConstantTerm(
+export function parseSimpleTerm(
   state: ParserState
 ): [RulesetParserObject | null, ParserState] {
   const token = peek(state);
