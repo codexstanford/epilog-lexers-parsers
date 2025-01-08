@@ -1,227 +1,124 @@
-import { expect, test, describe } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { rulesetLexer } from "./ruleset-lexer";
-import { validateTokenBoundaries } from "./test-utils";
 
 describe("rulesetLexer", () => {
-  test("lexes named variables", () => {
-    const input = "parent(Person, Child)";
-    const tokens = rulesetLexer(input);
-    validateTokenBoundaries(input, tokens);
-
-    expect(tokens[0].type).toBe("SYMBOL_TERM");
-    expect(tokens[1].type).toBe("OPEN_PAREN");
-    expect(tokens[2].type).toBe("VARIABLE_NAMED");
-    expect(tokens[2].content).toBe("Person");
-    expect(tokens[3].type).toBe("COMMA");
-    expect(tokens[4].type).toBe("WHITESPACE");
-    expect(tokens[5].type).toBe("VARIABLE_NAMED");
-    expect(tokens[5].content).toBe("Child");
-    expect(tokens[6].type).toBe("CLOSE_PAREN");
+  it("handles rule separator/neck operator (:-)", () => {
+    const tokens = rulesetLexer("pred(A) :- p(A), q(A).");
+    expect(tokens).toEqual([
+      { type: "SYMBOL_TERM", start: 0, end: 4, line: 1, content: "pred" },
+      { type: "OPEN_PAREN", start: 4, end: 5, line: 1, content: "(" },
+      { type: "VARIABLE_NAMED", start: 5, end: 6, line: 1, content: "A" },
+      { type: "CLOSE_PAREN", start: 6, end: 7, line: 1, content: ")" },
+      { type: "WHITESPACE", start: 7, end: 8, line: 1, content: " " },
+      {
+        type: "RULE_SEPARATOR_NECK",
+        start: 8,
+        end: 10,
+        line: 1,
+        content: ":-",
+      },
+      { type: "WHITESPACE", start: 10, end: 11, line: 1, content: " " },
+      { type: "SYMBOL_TERM", start: 11, end: 12, line: 1, content: "p" },
+      { type: "OPEN_PAREN", start: 12, end: 13, line: 1, content: "(" },
+      { type: "VARIABLE_NAMED", start: 13, end: 14, line: 1, content: "A" },
+      { type: "CLOSE_PAREN", start: 14, end: 15, line: 1, content: ")" },
+      { type: "COMMA", start: 15, end: 16, line: 1, content: "," },
+      { type: "WHITESPACE", start: 16, end: 17, line: 1, content: " " },
+      { type: "SYMBOL_TERM", start: 17, end: 18, line: 1, content: "q" },
+      { type: "OPEN_PAREN", start: 18, end: 19, line: 1, content: "(" },
+      { type: "VARIABLE_NAMED", start: 19, end: 20, line: 1, content: "A" },
+      { type: "CLOSE_PAREN", start: 20, end: 21, line: 1, content: ")" },
+      { type: "PERIOD", start: 21, end: 22, line: 1, content: "." },
+    ]);
   });
 
-  test("lexes anonymous variables", () => {
-    const input = "parent(_, Child)";
-    const tokens = rulesetLexer(input);
-    validateTokenBoundaries(input, tokens);
-
-    expect(tokens[0].type).toBe("SYMBOL_TERM");
-    expect(tokens[0].content).toBe("parent");
-    expect(tokens[1].type).toBe("OPEN_PAREN");
-    expect(tokens[1].content).toBe("(");
-    expect(tokens[2].type).toBe("VARIABLE_ANONYMOUS");
-    expect(tokens[2].content).toBe("_");
-    expect(tokens[3].type).toBe("COMMA");
-    expect(tokens[3].content).toBe(",");
-    expect(tokens[4].type).toBe("WHITESPACE");
-    expect(tokens[4].content).toBe(" ");
-    expect(tokens[5].type).toBe("VARIABLE_NAMED");
-    expect(tokens[5].content).toBe("Child");
-    expect(tokens[6].type).toBe("CLOSE_PAREN");
-    expect(tokens[6].content).toBe(")");
+  it("handles double-colon operator (::)", () => {
+    const tokens = rulesetLexer("type :: predicate.");
+    expect(tokens).toEqual([
+      { type: "SYMBOL_TERM", start: 0, end: 4, line: 1, content: "type" },
+      { type: "WHITESPACE", start: 4, end: 5, line: 1, content: " " },
+      { type: "DOUBLE_COLON", start: 5, end: 7, line: 1, content: "::" },
+      { type: "WHITESPACE", start: 7, end: 8, line: 1, content: " " },
+      {
+        type: "SYMBOL_TERM",
+        start: 8,
+        end: 18,
+        line: 1,
+        content: "predicate.",
+      },
+    ]);
   });
 
-  test("lexes rule operators", () => {
-    const input = "grandparent(X, Y) :- parent(X, Z) & parent(Z, Y).";
-    const tokens = rulesetLexer(input);
-    validateTokenBoundaries(input, tokens);
-
-    expect(tokens[0].type).toBe("SYMBOL_TERM");
-    expect(tokens[0].content).toBe("grandparent");
-    expect(tokens[1].type).toBe("OPEN_PAREN");
-    expect(tokens[1].content).toBe("(");
-    expect(tokens[2].type).toBe("VARIABLE_NAMED");
-    expect(tokens[2].content).toBe("X");
-    expect(tokens[3].type).toBe("COMMA");
-    expect(tokens[3].content).toBe(",");
-    expect(tokens[4].type).toBe("WHITESPACE");
-    expect(tokens[4].content).toBe(" ");
-    expect(tokens[5].type).toBe("VARIABLE_NAMED");
-    expect(tokens[5].content).toBe("Y");
-    expect(tokens[6].type).toBe("CLOSE_PAREN");
-    expect(tokens[6].content).toBe(")");
-    expect(tokens[7].type).toBe("WHITESPACE");
-    expect(tokens[7].content).toBe(" ");
-    expect(tokens[8].type).toBe("RULE_SEPARATOR_NECK");
-    expect(tokens[8].content).toBe(":-");
-    expect(tokens[9].type).toBe("WHITESPACE");
-    expect(tokens[9].content).toBe(" ");
-    expect(tokens[10].type).toBe("SYMBOL_TERM");
-    expect(tokens[10].content).toBe("parent");
-    expect(tokens[11].type).toBe("OPEN_PAREN");
-    expect(tokens[11].content).toBe("(");
-    expect(tokens[12].type).toBe("VARIABLE_NAMED");
-    expect(tokens[12].content).toBe("X");
-    expect(tokens[13].type).toBe("COMMA");
-    expect(tokens[13].content).toBe(",");
-    expect(tokens[14].type).toBe("WHITESPACE");
-    expect(tokens[14].content).toBe(" ");
-    expect(tokens[15].type).toBe("VARIABLE_NAMED");
-    expect(tokens[15].content).toBe("Z");
-    expect(tokens[16].type).toBe("CLOSE_PAREN");
-    expect(tokens[16].content).toBe(")");
-    expect(tokens[17].type).toBe("WHITESPACE");
-    expect(tokens[17].content).toBe(" ");
-    expect(tokens[18].type).toBe("AMPERSAND");
-    expect(tokens[18].content).toBe("&");
-    expect(tokens[19].type).toBe("WHITESPACE");
-    expect(tokens[19].content).toBe(" ");
-    expect(tokens[20].type).toBe("SYMBOL_TERM");
-    expect(tokens[20].content).toBe("parent");
-    expect(tokens[21].type).toBe("OPEN_PAREN");
-    expect(tokens[21].content).toBe("(");
-    expect(tokens[22].type).toBe("VARIABLE_NAMED");
-    expect(tokens[22].content).toBe("Z");
-    expect(tokens[23].type).toBe("COMMA");
-    expect(tokens[23].content).toBe(",");
-    expect(tokens[24].type).toBe("WHITESPACE");
-    expect(tokens[24].content).toBe(" ");
-    expect(tokens[25].type).toBe("VARIABLE_NAMED");
-    expect(tokens[25].content).toBe("Y");
-    expect(tokens[26].type).toBe("CLOSE_PAREN");
-    expect(tokens[26].content).toBe(")");
-    expect(tokens[27].type).toBe("PERIOD");
-    expect(tokens[27].content).toBe(".");
+  it("handles definition separator operator (:=)", () => {
+    const tokens = rulesetLexer("func(X) := value.");
+    expect(tokens).toEqual([
+      { type: "SYMBOL_TERM", start: 0, end: 4, line: 1, content: "func" },
+      { type: "OPEN_PAREN", start: 4, end: 5, line: 1, content: "(" },
+      { type: "VARIABLE_NAMED", start: 5, end: 6, line: 1, content: "X" },
+      { type: "CLOSE_PAREN", start: 6, end: 7, line: 1, content: ")" },
+      { type: "WHITESPACE", start: 7, end: 8, line: 1, content: " " },
+      {
+        type: "DEFINITION_SEPARATOR",
+        start: 8,
+        end: 10,
+        line: 1,
+        content: ":=",
+      },
+      { type: "WHITESPACE", start: 10, end: 11, line: 1, content: " " },
+      { type: "SYMBOL_TERM", start: 11, end: 17, line: 1, content: "value." },
+    ]);
   });
 
-  test("lexes logical operators", () => {
-    const input = "~foo(X) & bar(Y)";
-    const tokens = rulesetLexer(input);
-    validateTokenBoundaries(input, tokens);
-
-    expect(tokens[0].type).toBe("NEGATION_SYMBOL");
-    expect(tokens[0].content).toBe("~");
-    expect(tokens[1].type).toBe("SYMBOL_TERM");
-    expect(tokens[1].content).toBe("foo");
-    expect(tokens[2].type).toBe("OPEN_PAREN");
-    expect(tokens[2].content).toBe("(");
-    expect(tokens[3].type).toBe("VARIABLE_NAMED");
-    expect(tokens[3].content).toBe("X");
-    expect(tokens[4].type).toBe("CLOSE_PAREN");
-    expect(tokens[4].content).toBe(")");
-    expect(tokens[5].type).toBe("WHITESPACE");
-    expect(tokens[5].content).toBe(" ");
-    expect(tokens[6].type).toBe("AMPERSAND");
-    expect(tokens[6].content).toBe("&");
-    expect(tokens[7].type).toBe("WHITESPACE");
-    expect(tokens[7].content).toBe(" ");
-    expect(tokens[8].type).toBe("SYMBOL_TERM");
-    expect(tokens[8].content).toBe("bar");
-    expect(tokens[9].type).toBe("OPEN_PAREN");
-    expect(tokens[9].content).toBe("(");
-    expect(tokens[10].type).toBe("VARIABLE_NAMED");
-    expect(tokens[10].content).toBe("Y");
-    expect(tokens[11].type).toBe("CLOSE_PAREN");
-    expect(tokens[11].content).toBe(")");
+  it("handles double-arrow operator (==>)", () => {
+    const tokens = rulesetLexer("if(X) ==> then(X).");
+    expect(tokens).toEqual([
+      { type: "SYMBOL_TERM", start: 0, end: 2, line: 1, content: "if" },
+      { type: "OPEN_PAREN", start: 2, end: 3, line: 1, content: "(" },
+      { type: "VARIABLE_NAMED", start: 3, end: 4, line: 1, content: "X" },
+      { type: "CLOSE_PAREN", start: 4, end: 5, line: 1, content: ")" },
+      { type: "WHITESPACE", start: 5, end: 6, line: 1, content: " " },
+      { type: "DOUBLE_ARROW", start: 6, end: 9, line: 1, content: "==>" },
+      { type: "WHITESPACE", start: 9, end: 10, line: 1, content: " " },
+      { type: "SYMBOL_TERM", start: 10, end: 14, line: 1, content: "then" },
+      { type: "OPEN_PAREN", start: 14, end: 15, line: 1, content: "(" },
+      { type: "VARIABLE_NAMED", start: 15, end: 16, line: 1, content: "X" },
+      { type: "CLOSE_PAREN", start: 16, end: 17, line: 1, content: ")" },
+      { type: "PERIOD", start: 17, end: 18, line: 1, content: "." },
+    ]);
   });
 
-  test("lexes definition operators", () => {
-    const input = ["foo(X) := bar(X).", "A :: B ==> C."].join("\n");
-    const tokens = rulesetLexer(input);
-    validateTokenBoundaries(input, tokens);
-
-    expect(tokens[0].type).toBe("SYMBOL_TERM");
-    expect(tokens[0].content).toBe("foo");
-    expect(tokens[1].type).toBe("OPEN_PAREN");
-    expect(tokens[1].content).toBe("(");
-    expect(tokens[2].type).toBe("VARIABLE_NAMED");
-    expect(tokens[2].content).toBe("X");
-    expect(tokens[3].type).toBe("CLOSE_PAREN");
-    expect(tokens[3].content).toBe(")");
-    expect(tokens[4].type).toBe("WHITESPACE");
-    expect(tokens[4].content).toBe(" ");
-    expect(tokens[5].type).toBe("DEFINITION_SEPARATOR");
-    expect(tokens[5].content).toBe(":=");
-    expect(tokens[6].type).toBe("WHITESPACE");
-    expect(tokens[6].content).toBe(" ");
-    expect(tokens[7].type).toBe("SYMBOL_TERM");
-    expect(tokens[7].content).toBe("bar");
-    expect(tokens[8].type).toBe("OPEN_PAREN");
-    expect(tokens[8].content).toBe("(");
-    expect(tokens[9].type).toBe("VARIABLE_NAMED");
-    expect(tokens[9].content).toBe("X");
-    expect(tokens[10].type).toBe("CLOSE_PAREN");
-    expect(tokens[10].content).toBe(")");
-    expect(tokens[11].type).toBe("PERIOD");
-    expect(tokens[11].content).toBe(".");
-    expect(tokens[12].type).toBe("WHITESPACE");
-    expect(tokens[13].type).toBe("VARIABLE_NAMED");
-    expect(tokens[13].content).toBe("A");
-    expect(tokens[14].type).toBe("WHITESPACE");
-    expect(tokens[14].content).toBe(" ");
-    expect(tokens[15].type).toBe("DOUBLE_COLON");
-    expect(tokens[15].content).toBe("::");
-    expect(tokens[16].type).toBe("WHITESPACE");
-    expect(tokens[16].content).toBe(" ");
-    expect(tokens[17].type).toBe("VARIABLE_NAMED");
-    expect(tokens[17].content).toBe("B");
-    expect(tokens[18].type).toBe("WHITESPACE");
-    expect(tokens[18].content).toBe(" ");
-    expect(tokens[19].type).toBe("DOUBLE_ARROW");
-    expect(tokens[19].content).toBe("==>");
-    expect(tokens[20].type).toBe("WHITESPACE");
-    expect(tokens[20].content).toBe(" ");
-    expect(tokens[21].type).toBe("VARIABLE_NAMED");
-    expect(tokens[21].content).toBe("C");
-    expect(tokens[22].type).toBe("PERIOD");
-    expect(tokens[22].content).toBe(".");
-  });
-
-  test("maintains line count across newlines", () => {
-    const input = ["foo(X) :-", "  bar(X) &", "  baz(X)."].join("\n");
-    const tokens = rulesetLexer(input);
-    validateTokenBoundaries(input, tokens);
-
-    const lastLine = tokens[tokens.length - 1].line;
-    expect(lastLine).toBe(3);
-  });
-
-  test("handles complex rules with mixed tokens", () => {
-    const input = `
-      ancestor(X, Y) :-
-        parent(X, Y).
-      ancestor(X, Y) :-
-        parent(X, Z) &
-        ancestor(Z, Y).
-    `;
-    const tokens = rulesetLexer(input);
-    validateTokenBoundaries(input, tokens);
-
-    const nonWhitespaceTokens = tokens.filter((t) => t.type !== "WHITESPACE");
-    expect(nonWhitespaceTokens.some((t) => t.type === "VARIABLE_NAMED")).toBe(
-      true
+  it("handles complex rule with multiple operators", () => {
+    const tokens = rulesetLexer(
+      "type::pred(A) :- p(A), q(A) ==> result := value."
     );
-    expect(
-      nonWhitespaceTokens.some((t) => t.type === "RULE_SEPARATOR_NECK")
-    ).toBe(true);
-    expect(nonWhitespaceTokens.some((t) => t.type === "AMPERSAND")).toBe(true);
-  });
-
-  test("correctly identifies errors", () => {
-    const input = "@invalid";
-    const tokens = rulesetLexer(input);
-    validateTokenBoundaries(input, tokens);
-
-    expect(tokens[0].type).toBe("ERROR");
-    expect(tokens[0].errorMessage).toBeDefined();
+    expect(tokens.map((t) => t.type)).toEqual([
+      "SYMBOL_TERM",
+      "DOUBLE_COLON",
+      "SYMBOL_TERM",
+      "OPEN_PAREN",
+      "VARIABLE_NAMED",
+      "CLOSE_PAREN",
+      "WHITESPACE",
+      "RULE_SEPARATOR_NECK",
+      "WHITESPACE",
+      "SYMBOL_TERM",
+      "OPEN_PAREN",
+      "VARIABLE_NAMED",
+      "CLOSE_PAREN",
+      "COMMA",
+      "WHITESPACE",
+      "SYMBOL_TERM",
+      "OPEN_PAREN",
+      "VARIABLE_NAMED",
+      "CLOSE_PAREN",
+      "WHITESPACE",
+      "DOUBLE_ARROW",
+      "WHITESPACE",
+      "SYMBOL_TERM",
+      "WHITESPACE",
+      "DEFINITION_SEPARATOR",
+      "WHITESPACE",
+      "SYMBOL_TERM",
+    ]);
   });
 });

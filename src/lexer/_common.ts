@@ -12,6 +12,10 @@ export const SINGLE_CHAR_TOKENS: { [key: string]: RulesetTokenType } = {
   "!": "LIST_SEPARATOR",
   ",": "COMMA",
   ".": "PERIOD",
+  // The following are only supported for rulesets
+  "&": "AMPERSAND",
+  "~": "NEGATION_SYMBOL",
+  _: "VARIABLE_ANONYMOUS",
 };
 
 /* -------------------------------------------------------------------------- */
@@ -32,6 +36,14 @@ export function isConstantChar(char: string): boolean {
 
 export function isDigit(char: string): boolean {
   return /[0-9]/.test(char);
+}
+
+export function isVariableStart(char: string): boolean {
+  return /[A-Z_]/.test(char);
+}
+
+export function isVariableChar(char: string): boolean {
+  return /[A-Za-z0-9_]/.test(char);
 }
 
 /* -------------------------------------------------------------------------- */
