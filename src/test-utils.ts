@@ -27,31 +27,19 @@ export function validateTokenBoundaries(input: string, tokens: RulesetToken[]) {
   });
 }
 
-export function findErrorPaths(
-  obj: RulesetParserObject
-): RulesetParserObject[][] {
-  const paths: RulesetParserObject[][] = [];
+export function findErrors(obj: RulesetParserObject): RulesetParserObject[] {
+  const errors: RulesetParserObject[] = [];
 
-  function traverse(
-    node: RulesetParserObject,
-    currentPath: RulesetParserObject[]
-  ) {
-    // Add current node to path
-    currentPath.push(node);
+  if (obj.type === "ERROR") {
+    errors.unshift(obj);
+    return errors;
+  }
 
-    // If current node is an error, add the path
-    if (node.type === "ERROR") {
-      paths.push([...currentPath]);
-    }
-
-    // Traverse all possible children
-    if (node.children) {
-      for (const child of node.children) {
-        traverse(child, [...currentPath]);
-      }
+  if (obj.children) {
+    for (const child of obj.children) {
+      errors.unshift(...findErrors(child));
     }
   }
 
-  traverse(obj, []);
-  return paths;
+  return errors;
 }

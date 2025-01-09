@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { rulesetLexer } from "../ruleset-lexer";
 import { parseRuleset } from "./ruleset";
-import { findErrorPaths } from "../test-utils";
+import { findErrors } from "../test-utils";
 
 const insurancePolicyRuleset = `
 covered(C, N) :- 
@@ -76,7 +76,7 @@ describe("parseRuleset", () => {
       expect(result.type).toBe("RULESET");
       expect(result.children).toBeDefined();
 
-      const errors = findErrorPaths(result);
+      const errors = findErrors(result);
       expect(errors).toHaveLength(0);
 
       const rules =

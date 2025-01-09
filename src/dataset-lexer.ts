@@ -22,7 +22,10 @@ export function datasetLexer(input: string): RulesetToken[] {
 
     if (isWhitespace(char)) {
       handleWhitespace(state);
-    } else if (isDigit(char)) {
+    } else if (
+      isDigit(char) ||
+      (char === "-" && isDigit(input[state.pos + 1]))
+    ) {
       handleNumber(state);
     } else if (isConstantStart(char)) {
       handleConstant(state);

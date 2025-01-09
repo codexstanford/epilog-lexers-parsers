@@ -1,0 +1,267 @@
+import { describe, expect, test } from "bun:test";
+import { rulesetLexer } from "../ruleset-lexer";
+import { parseRuleset } from "./ruleset";
+import { findErrors } from "../test-utils";
+
+const cardinalCareRuleset = `% covers(Policy, C) :-
+%     policy.type(Policy, aetna_cardinal_care_2023_2024) &
+%     covered_under_policy(C, Policy, aetna_cardinal_care_2023_2024)
+
+
+%covered_under_policy(C, Policy, aetna_cardinal_care_2023_2024) :-
+covered(C) :-
+    % policy_in_effect(C, Policy) &
+    service_received_at_valid_provider(C) &
+    meets_additional_eligibility_requirements_if_present(C) &
+    medically_necessary_service(C) &
+    precertified_if_necessary(C) &
+    ~beyond_limits(C) &
+    claim.exclusions(C, nil)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Policy in effect
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Important note: Does not currently capture conditions on withdrawal/leaves of absence, coverage on another Stanford-offered plan, or special extensions on coverage dates
+
+% Whether the policy was in effect when the service was received
+% policy_in_effect(C, Policy) :-
+%     claim.patient(C, Patient) &
+%     claim.waived_cardinal_care(C, no) &
+%     policy_in_effect_for_claim(Policy, C)
+
+
+% Student enrolled in Autumn 2024
+% policy_in_effect_for_claim(Policy, Claim) :-
+%     claim.date_service_received(Claim, ServiceDate) &
+%     claim.quarter_enrolled_stanford_2024_2025(Claim, autumn_quarter_2024) &
+%     date_between_dates_incl(ServiceDate, 2024_09_01, 2025_08_31)
+
+
+% Student enrolled in Winter 2025
+% policy_in_effect_for_claim(Policy, Claim) :-
+%     claim.date_service_received(Claim, ServiceDate) &
+%     claim.quarter_enrolled_stanford_2024_2025(Claim, winter_quarter_2025) &
+%     date_between_dates_incl(ServiceDate, 2025_01_01, 2025_08_31)
+
+% Student enrolled in Spring 2025
+% policy_in_effect_for_claim(Policy, Claim) :-
+%     claim.date_service_received(Claim, ServiceDate) &
+%     claim.quarter_enrolled_stanford_2024_2025(Claim, spring_quarter_2025) &
+%     date_between_dates_incl(ServiceDate, 2025_04_01, 2025_08_31)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Received from a valid provider
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Important note: Encoding does not currently capture the cases where treatment began out-of-network before the policy began, or when the care is emergency or urgent care and received from an out-of-network provider
+
+service_received_at_valid_provider(C) :-
+    claim.location_service_received(C, Location) &
+    member(Location, [
+        stanford_health_care,
+        menlo_medical_clinic,
+        sutter_health_palo_alto_medical_foundation,
+        tier_two_in_network
+    ])
+
+service_received_at_valid_provider(C) :-
+    claim.location_service_received(C, other) &
+    claim.service_available_at_tier_one_or_two_location(C, no)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Eligible for service - additional eligibility requirements
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+meets_additional_eligibility_requirements_if_present(C) :-
+    covered_under_cardinal_care_24_25_benefit(C, B)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Medical necessity
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+medically_necessary_service(C) :-
+    claim.service_type(C, ServiceType) &
+    is_preventive_care_service(ServiceType)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Precertified if necessary
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+precertified_if_necessary(C) :-
+    claim.service_type(C, ServiceType) &
+    requires_precertification(ServiceType) & 
+    claim.precertification_received(C, yes)
+
+precertified_if_necessary(C) :-
+    claim.service_type(C, ServiceType) &
+    ~requires_precertification(ServiceType)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Limitations from Schedule of Benefits
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Important Note: Loaded from other, benefit-specific rulesets
+    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% General exclusions 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Important Note: Formerly loaded from exclusion.hrf. Now encoded in world.hdf.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Helper functions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+patient_age_at_time_of_service(Claim, Age) :-
+    claim.patient_dob(Claim, PatientDOB) &
+    claim.date_service_received(Claim, ServiceDate) &
+    patient_age_on_date(PatientDOB, ServiceDate, Age)
+
+patient_age_on_date(PatientDOB, Date, Age) :-
+    evaluate(parsedate(Date),[Year,Month,Day]) &
+    evaluate(parsedate(PatientDOB),[PatientDOBYear,PatientDOBMonth,PatientDOBDay]) &
+    evaluate(minus(Year,PatientDOBYear), YearDiff) &
+    not_yet_birthday_delta(Month,Day, PatientDOBMonth, PatientDOBDay, Delta) &
+    evaluate(plus(YearDiff, Delta), Age)
+
+age_at_time_of_service(Claim, Person, Age) :-
+    claim.date_service_received(Claim, ServiceDate) &
+    age_on_date(Person, ServiceDate, Age)
+
+age_on_date(Person, Date, Age) :-
+    person.dob(Person, DOB) &
+    evaluate(parsedate(Date),[Year,Month,Day]) &
+    evaluate(parsedate(DOB),[DOBYear,DOBMonth,DOBDay]) &
+    evaluate(minus(Year,DOBYear), YearDiff) &
+    not_yet_birthday_delta(Month,Day, DOBMonth, DOBDay, Delta) &
+    evaluate(plus(YearDiff, Delta), Age)
+
+
+not_yet_birthday_delta(Month, Day, DOBMonth, DOBDay, -1) :-
+    less(Month, DOBMonth)
+
+not_yet_birthday_delta(Month, Day, DOBMonth, DOBDay, -1) :-
+    same(Month, DOBMonth) &
+    less(Day, DOBDay)
+
+not_yet_birthday_delta(Month, Day, DOBMonth, DOBDay, 0) :-
+    less(DOBMonth, Month)
+
+not_yet_birthday_delta(Month, Day, FOBMonth, DOBDay, 0) :-
+    same(Month, DOBMonth) &
+    leq(DOBDay, Day)
+
+
+date_between_dates_incl(Date, BeginDateRange, EndDateRange) :-
+    symleq(BeginDateRange, Date) &
+    symleq(Date, EndDateRange)
+
+leq_n_months_diff(EarlierDate, LaterDate, N) :-
+    n_months_diff(EarlierDate, LaterDate, Diff) &
+    less(Diff, N)
+
+leq_n_months_diff(EarlierDate, LaterDate, N) :-
+    n_months_diff(EarlierDate, LaterDate, N) &
+    evaluate(parsedate(EarlierDate),[_,_,SameDay]) & 
+    evaluate(parsedate(LaterDate),[_,_,SameDay])
+
+n_months_diff(EarlierDate, LaterDate, N) :-
+    evaluate(parsedate(EarlierDate),[EY,EM,ED]) & 
+    evaluate(parsedate(LaterDate),[LY,LM,LD]) &
+    evaluate(times(minus(LY, EY), 12), MonthsFromYear) & 
+    not_yet_day_of_month_delta(ED, LD, Delta) &
+    evaluate(plus(MonthsFromYear, minus(LM, EM), Delta), N)
+
+not_yet_day_of_month_delta(D1, D2, 0) :-
+    leq(D1, D2)
+
+not_yet_day_of_month_delta(D1, D2, -1) :-
+    less(D2, D1)
+
+%%%%% Relations to faciliate choosing elements from lists that may have repeats
+
+% Generates all pairs (unordered) of elements from a list, counting identical elements at different positions as distinct
+choose_2_with_indices_from_list_no_repeats(L, E1, I1, E2, I2) :-
+    choose_2_with_indices_from_sublist_no_repeats(0, L, E1, I1, E2, I2)
+
+
+% Case 1: The first element is the head
+choose_2_with_indices_from_sublist_no_repeats(NumBefore, [H!T], H, NumBefore, E2, I2) :-
+    evaluate(plus(NumBefore, 1), NewNumBefore) &
+    choose_1_with_index_from_sublist(NewNumBefore, T, E2, I2)
+
+% Case 2: The first element is in the tail
+choose_2_with_indices_from_sublist_no_repeats(NumBefore, [H!T], E1, I1, E2, I2) :-
+    evaluate(plus(NumBefore, 1), NewNumBefore) &
+    choose_2_with_indices_from_sublist_no_repeats(NewNumBefore, T, E1, I1, E2, I2)
+
+
+% Entry point
+choose_1_with_index_from_list(L, E, I) :-
+    choose_1_with_index_from_sublist(0, L, E, I)
+
+% Case 1: The element is the head
+choose_1_with_index_from_sublist(NumBefore, [H!T], H, NumBefore)
+
+% Case 2: The element is in the tail
+choose_1_with_index_from_sublist(NumBefore, [H!T], E, I) :-
+    evaluate(plus(NumBefore, 1), NewNumBefore) &
+    choose_1_with_index_from_sublist(NewNumBefore, T, E, I)`;
+
+describe("parseRuleset", () => {
+  describe("Cardinal Care Ruleset", () => {
+    test("should parse the complete Cardinal Care ruleset", () => {
+      const result = parseRuleset(rulesetLexer(cardinalCareRuleset));
+
+      expect(result.type).toBe("RULESET");
+      expect(result.children).toBeDefined();
+
+      const errors = findErrors(result);
+
+      if (errors.length) console.log(JSON.stringify(errors, null, 2));
+
+      expect(errors).toHaveLength(0);
+    });
+
+    test("should handle commented-out rules correctly", () => {
+      const result = parseRuleset(rulesetLexer(cardinalCareRuleset));
+      const comments =
+        result.children?.filter((child) => child.type === "COMMENT") || [];
+      expect(comments.length).toBeGreaterThan(0);
+
+      // Check if we have the commented-out policy rule
+      const policyComment = comments.some((comment) =>
+        comment.content?.includes("covers(Policy, C)")
+      );
+      expect(policyComment).toBe(true);
+    });
+
+    test("should parse main coverage rule correctly", () => {
+      const result = parseRuleset(rulesetLexer(cardinalCareRuleset));
+
+      const mainRule = result.children?.find(
+        (child) =>
+          child.type === "RULE" &&
+          child.children?.[0]?.content?.startsWith("covered(C)")
+      );
+
+      expect(mainRule).toBeDefined();
+      expect(mainRule?.children?.length).toBeGreaterThan(1);
+    });
+
+    test("should parse helper functions with evaluates", () => {
+      const result = parseRuleset(rulesetLexer(cardinalCareRuleset));
+
+      const rulesWithEvaluate = result.children?.filter(
+        (child) => child.type === "RULE" && child.content?.includes("evaluate")
+      );
+
+      expect(rulesWithEvaluate?.length).toBeGreaterThan(0);
+    });
+  });
+});

@@ -25,7 +25,10 @@ export function rulesetLexer(input: string): RulesetToken[] {
 
     if (isWhitespace(char)) {
       handleWhitespace(state);
-    } else if (isDigit(char)) {
+    } else if (
+      isDigit(char) ||
+      (char === "-" && isDigit(input[state.pos + 1]))
+    ) {
       handleNumber(state);
     } else if (isVariableStart(char)) {
       // This needs to come before SINGLE_CHAR_TOKENS
