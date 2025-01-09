@@ -104,6 +104,17 @@ describe("parseRule", () => {
     expect(result?.children?.at(-1)?.type).toBe("ERROR");
   });
 
+  test("should error on unfinished horn clause", () => {
+    const state: ParserState = createParserState(
+      rulesetLexer("pred(A) :-"),
+      "RULESET"
+    );
+
+    const [result] = parseRule(state);
+    expect(result?.type).toBe("ERROR");
+    expect(result?.children?.at(-1)?.type).toBe("ERROR");
+  });
+
   test("should parse rule with negated literal", () => {
     const state: ParserState = createParserState(
       rulesetLexer("p(X) :- q(X) & ~r(X)"),

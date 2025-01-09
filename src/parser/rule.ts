@@ -44,59 +44,12 @@ export function parseRule(
     children.push(ruleNeck);
     currentState = advance(currentState)[1];
 
-    // Parse literals and ampersands
-    while (true) {
-      const token = peek(currentState);
-
-      if (!token || token.type === "PERIOD") {
-        // EOF or period is only allowed if last token was not an ampersand
-        // So, add an error if this is the case
-        // Otherwise, we are done parsing the rule
-        const lastNonWhitespaceToken =
-          getLastNonWhitespaceOrCommentObject(children);
-
-        if (!lastNonWhitespaceToken)
-          throw Error(
-            "If we get here, lastNonWhitespaceToken should at least be the RULE_SEPARATOR_NECK"
-          );
-
-        if (lastNonWhitespaceToken.type === "AMPERSAND") {
-          hasError = true;
-          const [errorObject, errorState] =
-            createErrorObjectAndAdvanceToNextLine(
-              currentState,
-              "An ampersand must be followed by a literal, got instead:" +
-                (token ? token?.type : "EOF")
-            );
-          children.push(errorObject);
-          currentState = errorState;
-        }
-
-        break;
-      }
-
-      if (isWhitespaceOrComment(token)) {
-        children.push(token);
-        currentState = advance(currentState)[1];
-        continue;
-      }
-
-      const [shouldContinue, newState] = parseRuleBodyElement(
-        currentState,
-        children
-      );
-      currentState = newState;
-
-      if (!shouldContinue) {
-        hasError = children[children.length - 1].type === "ERROR";
-        break;
-      }
-    }
+    const [literalsResult, newState, literalsHasError] =
+      parseOneOrMoreAmpersandSeparatedLiterals(currentState);
+    children.push(...literalsResult);
+    currentState = newState;
+    hasError = hasError || literalsHasError;
   }
-
-  // We do not need to consume whitespaces and comments here.
-  // If there was no rule neck, we have already consumed them.
-  // If there was a rule neck, we have already consumed them in the loop above.
 
   // Check for optional period
   const period = peek(currentState);
@@ -113,6 +66,64 @@ export function parseRule(
     ),
     currentState,
   ];
+}
+
+export function parseOneOrMoreAmpersandSeparatedLiterals(
+  state: ParserState
+): [RulesetParserObject[], ParserState, boolean] {
+  const children: RulesetParserObject[] = [];
+  let currentState = state;
+  let hasError = false;
+
+  while (true) {
+    const token = peek(currentState);
+
+    if (!token || token.type === "PERIOD") {
+      const lastNonWhitespaceToken =
+        getLastNonWhitespaceOrCommentObject(children);
+
+      if (lastNonWhitespaceToken?.type === "AMPERSAND") {
+        hasError = true;
+        const [errorObject, errorState] = createErrorObjectAndAdvanceToNextLine(
+          currentState,
+          "An ampersand must be followed by a literal, got instead:" +
+            (token ? token?.type : "EOF")
+        );
+        children.push(errorObject);
+        currentState = errorState;
+      }
+
+      break;
+    }
+
+    if (isWhitespaceOrComment(token)) {
+      children.push(token);
+      currentState = advance(currentState)[1];
+      continue;
+    }
+
+    const [shouldContinue, newState] = parseRuleBodyElement(
+      currentState,
+      children
+    );
+    currentState = newState;
+
+    if (!shouldContinue) {
+      hasError = children[children.length - 1].type === "ERROR";
+      break;
+    }
+  }
+
+  if (children.length === 0) {
+    const [errorObject, errorState] = createErrorObjectAndAdvanceToNextLine(
+      currentState,
+      "At least one literal was expected"
+    );
+
+    return [[errorObject], errorState, true];
+  }
+
+  return [children, currentState, hasError];
 }
 
 /**
@@ -138,12 +149,8 @@ function parseRuleBodyElement(
 ): [boolean, ParserState] {
   const lastNonWhitespaceToken = getLastNonWhitespaceOrCommentObject(children);
 
-  if (!lastNonWhitespaceToken)
-    throw Error(
-      "If we get here, lastNonWhitespaceToken should at least be the RULE_SEPARATOR_NECK"
-    );
-
   const isExpectingLiteral =
+    lastNonWhitespaceToken === null ||
     lastNonWhitespaceToken.type === "RULE_SEPARATOR_NECK" ||
     lastNonWhitespaceToken.type === "AMPERSAND";
 
@@ -157,7 +164,7 @@ function parseRuleBodyElement(
   return parseOptionalAmpersandElement(state, children);
 }
 
-function parseLiteralElement(
+export function parseLiteralElement(
   state: ParserState,
   children: RulesetParserObject[]
 ): [boolean, ParserState] {
@@ -176,7 +183,7 @@ function parseLiteralElement(
   return [true, newState];
 }
 
-function parseOptionalAmpersandElement(
+export function parseOptionalAmpersandElement(
   state: ParserState,
   children: RulesetParserObject[]
 ): [boolean, ParserState] {

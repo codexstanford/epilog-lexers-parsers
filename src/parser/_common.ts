@@ -51,6 +51,6 @@ export function createParserObject(
     endLine: endLine && firstChild.line !== endLine ? endLine : undefined,
     content: children.map((c) => c.content).join(""),
     children,
-    ...(errorMsg && { errorMessage: "Invalid list structure" }),
+    ...(errorMsg && { errorMessage: errorMsg }),
   };
 }
