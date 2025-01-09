@@ -58,14 +58,14 @@ describe("parseListTerm", () => {
 
   test("should parse bracketed list with multiple terms", () => {
     const state: ParserState = createParserState(
-      datasetLexer("[x!y]"),
+      datasetLexer("[x,y]"),
       "DATASET"
     );
 
     const [result] = parseListTerm(state);
     expect(result).not.toBeNull();
     expect(result?.type).toBe("LIST_TERM");
-    expect(result?.content).toBe("[x!y]");
+    expect(result?.content).toBe("[x,y]");
     expect(result?.children).toHaveLength(5);
     expect(result?.children?.[0]?.type).toBe("OPEN_BRACKET");
     expect(result?.children?.[0]?.content).toBe("[");
@@ -73,8 +73,8 @@ describe("parseListTerm", () => {
     expect(result?.children?.[1]?.content).toBe("x");
     expect(result?.children?.[1]?.children?.[0].type).toBe("SIMPLE_TERM");
     expect(result?.children?.[1]?.children?.[0].content).toBe("x");
-    expect(result?.children?.[2]?.type).toBe("LIST_SEPARATOR");
-    expect(result?.children?.[2]?.content).toBe("!");
+    expect(result?.children?.[2]?.type).toBe("COMMA");
+    expect(result?.children?.[2]?.content).toBe(",");
     expect(result?.children?.[3]?.type).toBe("TERM");
     expect(result?.children?.[3]?.content).toBe("y");
     expect(result?.children?.[3]?.children?.[0].type).toBe("SIMPLE_TERM");
@@ -85,14 +85,14 @@ describe("parseListTerm", () => {
 
   test("should parse list with whitespace between terms", () => {
     const state: ParserState = createParserState(
-      datasetLexer("[x ! y]"),
+      datasetLexer("[x , y]"),
       "DATASET"
     );
 
     const [result] = parseListTerm(state);
     expect(result).not.toBeNull();
     expect(result?.type).toBe("LIST_TERM");
-    expect(result?.content).toBe("[x ! y]");
+    expect(result?.content).toBe("[x , y]");
     expect(result?.children).toHaveLength(7);
     expect(result?.children?.[0]?.type).toBe("OPEN_BRACKET");
     expect(result?.children?.[0]?.content).toBe("[");
@@ -101,8 +101,8 @@ describe("parseListTerm", () => {
     expect(result?.children?.[1]?.children?.[0].content).toBe("x");
     expect(result?.children?.[2]?.type).toBe("WHITESPACE");
     expect(result?.children?.[2]?.content).toBe(" ");
-    expect(result?.children?.[3]?.type).toBe("LIST_SEPARATOR");
-    expect(result?.children?.[3]?.content).toBe("!");
+    expect(result?.children?.[3]?.type).toBe("COMMA");
+    expect(result?.children?.[3]?.content).toBe(",");
     expect(result?.children?.[4]?.type).toBe("WHITESPACE");
     expect(result?.children?.[4]?.content).toBe(" ");
     expect(result?.children?.[5]?.type).toBe("TERM");
@@ -114,21 +114,21 @@ describe("parseListTerm", () => {
 
   test("should parse nested list", () => {
     const state: ParserState = createParserState(
-      datasetLexer("[x![y]]"),
+      datasetLexer("[x,[y]]"),
       "DATASET"
     );
 
     const [result] = parseListTerm(state);
     expect(result).not.toBeNull();
     expect(result?.type).toBe("LIST_TERM");
-    expect(result?.content).toBe("[x![y]]");
+    expect(result?.content).toBe("[x,[y]]");
     expect(result?.children).toHaveLength(5);
     expect(result?.children?.[0]?.type).toBe("OPEN_BRACKET");
     expect(result?.children?.[1]?.type).toBe("TERM");
     expect(result?.children?.[1]?.children?.[0].type).toBe("SIMPLE_TERM");
     expect(result?.children?.[1]?.children?.[0].content).toBe("x");
-    expect(result?.children?.[2]?.type).toBe("LIST_SEPARATOR");
-    expect(result?.children?.[2]?.content).toBe("!");
+    expect(result?.children?.[2]?.type).toBe("COMMA");
+    expect(result?.children?.[2]?.content).toBe(",");
     expect(result?.children?.[3]?.type).toBe("TERM");
     expect(result?.children?.[3]?.children?.[0].type).toBe("LIST_TERM");
     expect(result?.children?.[3]?.children?.[0].content).toBe("[y]");
@@ -168,7 +168,7 @@ describe("parseListTerm", () => {
 
   test("should handle error for trailing comma", () => {
     const state: ParserState = createParserState(
-      datasetLexer("[x!]"),
+      datasetLexer("[x,]"),
       "DATASET"
     );
 
@@ -178,7 +178,7 @@ describe("parseListTerm", () => {
 
   test("should handle error for consecutive commas", () => {
     const state: ParserState = createParserState(
-      datasetLexer("[x!!y]"),
+      datasetLexer("[x,,y]"),
       "DATASET"
     );
 
@@ -250,14 +250,14 @@ describe("parseListTerm", () => {
 
   test("should parse list containing compound term", () => {
     const state: ParserState = createParserState(
-      datasetLexer("[x! f(y)! z]"),
+      datasetLexer("[x, f(y), z]"),
       "DATASET"
     );
 
     const [result] = parseListTerm(state);
     expect(result).not.toBeNull();
     expect(result?.type).toBe("LIST_TERM");
-    expect(result?.content).toBe("[x! f(y)! z]");
+    expect(result?.content).toBe("[x, f(y), z]");
 
     // Check compound term in the middle
     const middleTerm = result?.children?.[4];
@@ -271,7 +271,7 @@ describe("parseListTerm", () => {
 
   test("should parse multi-line list", () => {
     const state: ParserState = createParserState(
-      datasetLexer("[\n  x!\n  y!\n  z\n]"),
+      datasetLexer("[\n  x,\n  y,\n  z\n]"),
       "DATASET"
     );
 
@@ -279,7 +279,7 @@ describe("parseListTerm", () => {
 
     expect(result).not.toBeNull();
     expect(result?.type).toBe("LIST_TERM");
-    expect(result?.content).toBe("[\n  x!\n  y!\n  z\n]");
+    expect(result?.content).toBe("[\n  x,\n  y,\n  z\n]");
     expect(result?.line).toBe(1);
     expect(result?.endLine).toBe(5);
 
@@ -293,7 +293,7 @@ describe("parseListTerm", () => {
 
   test("should parse multi-line list with comments", () => {
     const state: ParserState = createParserState(
-      datasetLexer("[a!\n% comment\nb %comment\n!c]"),
+      datasetLexer("[a,\n% comment\nb %comment\n,c]"),
       "DATASET"
     );
 
@@ -301,7 +301,7 @@ describe("parseListTerm", () => {
 
     expect(result).not.toBeNull();
     expect(result?.type).toBe("LIST_TERM");
-    expect(result?.content).toBe("[a!\n% comment\nb %comment\n!c]");
+    expect(result?.content).toBe("[a,\n% comment\nb %comment\n,c]");
     expect(result?.line).toBe(1);
     expect(result?.endLine).toBe(4);
 
@@ -332,14 +332,14 @@ describe("parseListTerm", () => {
 
   test("should parse list with anonymous variables in RULESET mode", () => {
     const state: ParserState = createParserState(
-      rulesetLexer("[_! [a! _]]"),
+      rulesetLexer("[_, [a, _]]"),
       "RULESET"
     );
 
     const [result] = parseListTerm(state);
     expect(result).not.toBeNull();
     expect(result?.type).toBe("LIST_TERM");
-    expect(result?.content).toBe("[_! [a! _]]");
+    expect(result?.content).toBe("[_, [a, _]]");
 
     // Check first anonymous variable
     const firstVar = result?.children?.[1];
@@ -359,14 +359,14 @@ describe("parseListTerm", () => {
 
   test("should parse list with named variables in RULESET mode", () => {
     const state: ParserState = createParserState(
-      rulesetLexer("[First! Rest]"),
+      rulesetLexer("[First, Rest]"),
       "RULESET"
     );
 
     const [result] = parseListTerm(state);
     expect(result).not.toBeNull();
     expect(result?.type).toBe("LIST_TERM");
-    expect(result?.content).toBe("[First! Rest]");
+    expect(result?.content).toBe("[First, Rest]");
 
     // Check first variable
     const firstVar = result?.children?.[1]?.children?.[0];
@@ -383,14 +383,14 @@ describe("parseListTerm", () => {
 
   test("should parse list with mixed variables and terms in RULESET mode", () => {
     const state: ParserState = createParserState(
-      rulesetLexer("[X! _! y! Z]"),
+      rulesetLexer("[X, _, y, Z]"),
       "RULESET"
     );
 
     const [result] = parseListTerm(state);
     expect(result).not.toBeNull();
     expect(result?.type).toBe("LIST_TERM");
-    expect(result?.content).toBe("[X! _! y! Z]");
+    expect(result?.content).toBe("[X, _, y, Z]");
 
     const terms = result?.children?.filter((child) => child.type === "TERM");
     expect(terms).toHaveLength(4);

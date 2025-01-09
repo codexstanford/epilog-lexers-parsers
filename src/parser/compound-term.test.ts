@@ -173,20 +173,20 @@ describe("parseCompoundTerm", () => {
 
   test("should parse compound term containing list", () => {
     const state: ParserState = createParserState(
-      datasetLexer("f(x, [y!z], w)"),
+      datasetLexer("f(x, [y,z], w)"),
       "DATASET"
     );
 
     const [result] = parseCompoundTerm(state);
     expect(result).not.toBeNull();
     expect(result?.type).toBe("COMPOUND_TERM");
-    expect(result?.content).toBe("f(x, [y!z], w)");
+    expect(result?.content).toBe("f(x, [y,z], w)");
 
     // Check list in the middle
     const middleArg = result?.children?.[5];
     expect(middleArg?.type).toBe("TERM");
     expect(middleArg?.children?.[0].type).toBe("LIST_TERM");
-    expect(middleArg?.children?.[0].content).toBe("[y!z]");
+    expect(middleArg?.children?.[0].content).toBe("[y,z]");
     expect(middleArg?.children?.[0].children).toHaveLength(5);
     expect(middleArg?.children?.[0].children?.[1]?.type).toBe("TERM");
     expect(middleArg?.children?.[0].children?.[1]?.children?.[0].content).toBe(
