@@ -12,9 +12,11 @@ import { parseVariable } from "./variable";
  * - list term
  * - variable (if allowed)
  * @param state
+ * @param checkExclamationSeparated Needed to prevent endless recursion
  */
 export function parseTerm(
-  state: ParserState
+  state: ParserState,
+  checkExclamationSeparated = true
 ): [RulesetParserObject | null, ParserState] {
   // Try parsing compound term
   const [compoundResult, compoundState] = parseCompoundTerm(state);
@@ -23,7 +25,10 @@ export function parseTerm(
   }
 
   // Try parsing list term
-  const [listResult, listState] = parseListTerm(state);
+  const [listResult, listState] = parseListTerm(
+    state,
+    checkExclamationSeparated
+  );
   if (listResult) {
     return [createParserObject("TERM", [listResult]), listState];
   }

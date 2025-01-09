@@ -1,7 +1,8 @@
 import type { ParserState, RulesetParserObject } from "../types";
 import {
-  getLastNonWhitespaceOrCommentObject,
+  consumeWhitespacesAndComments,
   createParserObject,
+  getLastNonWhitespaceOrCommentObject,
   isWhitespaceOrComment,
 } from "./_common";
 import {
@@ -30,9 +31,11 @@ import { parseTerm } from "./term";
  *     - list separator
  *     - term
  * @param state
+ * @param checkExclamationSeparated Needed to prevent endless recursion
  */
 export function parseListTerm(
-  state: ParserState
+  state: ParserState,
+  checkExclamationSeparated = true
 ): [RulesetParserObject | null, ParserState] {
   // Try parsing nil constant
   const [nilResult, nilState] = parseNilConstant(state);
@@ -42,7 +45,13 @@ export function parseListTerm(
   const [bracketResult, bracketState] = parseBracketedList(state);
   if (bracketResult) return [bracketResult, bracketState];
 
-  // TODO: Implement exclamation-separated list parsing
+  if (checkExclamationSeparated) {
+    // Try parsing exclamation-separated list
+    const [exclamationResult, exclamationState] =
+      parseExclamationSeparatedList(state);
+    if (exclamationResult) return [exclamationResult, exclamationState];
+  }
+
   return [null, state];
 }
 
@@ -162,9 +171,10 @@ function parseBracketedListElement(
 
 function parseTermElement(
   state: ParserState,
-  children: RulesetParserObject[]
+  children: RulesetParserObject[],
+  checkExclamationSeparated?: boolean
 ): [boolean, ParserState] {
-  const [termObject, newState] = parseTerm(state);
+  const [termObject, newState] = parseTerm(state, checkExclamationSeparated);
 
   if (!termObject) {
     const [errorObject, errorState] = createErrorObjectAndAdvanceToNextLine(
@@ -198,4 +208,76 @@ function parseCommaElement(
 
   children.push(token);
   return [true, advance(state)[1]];
+}
+
+/* -------------------------------------------------------------------------- */
+/*                         Exclamation-Separated List                         */
+/* -------------------------------------------------------------------------- */
+
+function parseExclamationSeparatedList(
+  state: ParserState
+): [RulesetParserObject | null, ParserState] {
+  const [firstTerm, afterFirstTerm] = parseTerm(state, false);
+  if (!firstTerm) return [null, state];
+
+  const children: RulesetParserObject[] = [firstTerm];
+  let currentState = afterFirstTerm;
+  let hasError = false;
+  let isExpectingTerm = true;
+
+  // Consume whitespaces and comments before potential exclamation mark
+  const [whitespaceObjects, stateAfterWhitespace] =
+    consumeWhitespacesAndComments(currentState);
+  children.push(...whitespaceObjects);
+  currentState = stateAfterWhitespace;
+
+  const potentialListSeparator = peek(currentState);
+
+  if (potentialListSeparator?.type !== "LIST_SEPARATOR") return [null, state];
+
+  children.push(potentialListSeparator);
+  currentState = advance(currentState)[1];
+
+  while (true) {
+    const token = peek(currentState);
+
+    if (token && isWhitespaceOrComment(token)) {
+      children.push(token);
+      currentState = advance(currentState)[1];
+      continue;
+    }
+
+    if (isExpectingTerm) {
+      const [success, newState] = parseTermElement(
+        currentState,
+        children,
+        false
+      );
+      currentState = newState;
+      if (!success) {
+        hasError = true;
+        break;
+      }
+      isExpectingTerm = false;
+      continue;
+    }
+
+    if (token?.type === "LIST_SEPARATOR") {
+      children.push(token);
+      currentState = advance(currentState)[1];
+      isExpectingTerm = true;
+      continue;
+    }
+
+    break;
+  }
+
+  return [
+    createParserObject(
+      "LIST_TERM",
+      children,
+      hasError ? "Invalid LIST_TERM" : undefined
+    ),
+    currentState,
+  ];
 }
