@@ -1,21 +1,8 @@
 import type { ParserState, RulesetParserObject } from "../types";
-import {
-  consumeWhitespacesAndComments,
-  createParserObject,
-  getLastNonWhitespaceOrCommentObject,
-  isWhitespaceOrComment,
-} from "./_common";
-import {
-  advance,
-  createErrorObjectAndAdvanceToNextLine,
-  peek,
-} from "./_control-flow";
+import { consumeWhitespacesAndComments, createParserObject } from "./_common";
+import { advance, peek } from "./_control-flow";
 import { parseAtom } from "./atom";
-import {
-  parseLiteralElement,
-  parseOneOrMoreAmpersandSeparatedLiterals,
-  parseOptionalAmpersandElement,
-} from "./rule";
+import { parseOneOrMoreAmpersandSeparatedLiterals } from "./rule";
 
 /**
  * Children are as follows:

@@ -104,6 +104,7 @@ export type RulesetParserObjectType =
   | "DOUBLE_COLON"
   | "DOUBLE_ARROW"
   | "DEFINITION_SEPARATOR"
+  | "DEFINITION" // TODO Wasn't mentioned in the spec
   | "RULESET";
 
 export interface RulesetParserObject extends Base {
