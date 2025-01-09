@@ -114,7 +114,7 @@ export function parseOneOrMoreAmpersandSeparatedLiterals(
     }
   }
 
-  if (children.length === 0) {
+  if (children.filter((child) => child.type === "LITERAL").length === 0) {
     const [errorObject, errorState] = createErrorObjectAndAdvanceToNextLine(
       currentState,
       "At least one literal was expected"

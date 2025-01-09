@@ -93,7 +93,7 @@ describe("parseRule", () => {
     ]);
   });
 
-  test("should error on incomplete rule body", () => {
+  test("should error if ampersand is not followed by an atom", () => {
     const state: ParserState = createParserState(
       rulesetLexer("p(X) :- q(X) &"),
       "RULESET"
@@ -110,9 +110,26 @@ describe("parseRule", () => {
       "RULESET"
     );
 
-    const [result] = parseRule(state);
-    expect(result?.type).toBe("ERROR");
-    expect(result?.children?.at(-1)?.type).toBe("ERROR");
+    const state2: ParserState = createParserState(
+      rulesetLexer("pred(A) :- "),
+      "RULESET"
+    );
+
+    const state3: ParserState = createParserState(
+      rulesetLexer("pred(A) :-."),
+      "RULESET"
+    );
+
+    const state4: ParserState = createParserState(
+      rulesetLexer("pred(A) :- ."),
+      "RULESET"
+    );
+
+    [state, state2, state3, state4].forEach((s) => {
+      const [result] = parseRule(s);
+      // console.log(result);
+      expect(result?.type).toBe("ERROR");
+    });
   });
 
   test("should parse rule with negated literal", () => {
