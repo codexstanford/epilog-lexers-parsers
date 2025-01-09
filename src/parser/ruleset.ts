@@ -1,4 +1,4 @@
-import type { RulesetParserObject, RulesetToken } from "../types";
+import type { ParserObject, Token } from "../types";
 import { consumeWhitespacesAndComments, createParserObject } from "./_common";
 import {
   createErrorObjectAndAdvanceToNextLine,
@@ -13,9 +13,9 @@ import { parseRule } from "./rule";
  * Children are 0 or more rules, operations, and/or definitions, i.e. (rule | operation | definition)
  * @param state
  */
-export function parseRuleset(tokens: RulesetToken[]): RulesetParserObject {
+export function parseRuleset(tokens: Token[]): ParserObject {
   let currentState = createParserState(tokens, "RULESET");
-  const children = [] as RulesetParserObject[];
+  const children = [] as ParserObject[];
 
   while (true) {
     // Consume whitespaces before trying to parse a rule, operation, or definition

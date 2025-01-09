@@ -1,2 +1,4 @@
 export { datasetLexer } from "./dataset-lexer";
-export { datasetParser } from "./dataset-parser";
+export { rulesetLexer } from "./ruleset-lexer";
+export { parseDataset } from "./parser/dataset";
+export { parseRuleset } from "./parser/ruleset";

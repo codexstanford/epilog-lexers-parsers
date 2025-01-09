@@ -1,7 +1,7 @@
 import { expect } from "bun:test";
-import type { RulesetParserObject, RulesetToken } from "./types";
+import type { ParserObject, Token } from "./types";
 
-export function validateTokenBoundaries(input: string, tokens: RulesetToken[]) {
+export function validateTokenBoundaries(input: string, tokens: Token[]) {
   // Sum of all tokens (end - start) should be equal to the input length
 
   const totalTokenLength = tokens.reduce((sum, token) => {
@@ -27,8 +27,8 @@ export function validateTokenBoundaries(input: string, tokens: RulesetToken[]) {
   });
 }
 
-export function findErrors(obj: RulesetParserObject): RulesetParserObject[] {
-  const errors: RulesetParserObject[] = [];
+export function findErrors(obj: ParserObject): ParserObject[] {
+  const errors: ParserObject[] = [];
 
   if (obj.type === "ERROR") {
     errors.unshift(obj);

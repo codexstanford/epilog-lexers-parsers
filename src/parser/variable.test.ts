@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { rulesetLexer } from "../ruleset-lexer";
-import type { RulesetParserObject } from "../types";
+import type { ParserObject } from "../types";
 import { createParserState } from "./_control-flow";
 import { parseVariable } from "./variable";
 
@@ -19,7 +19,7 @@ describe("parseVariable", () => {
       children: [
         { type: "VARIABLE_NAMED", start: 0, end: 1, line: 1, content: "X" },
       ],
-    } satisfies RulesetParserObject);
+    } satisfies ParserObject);
 
     expect(newState.current).toBe(1);
   });
@@ -38,7 +38,7 @@ describe("parseVariable", () => {
       children: [
         { type: "VARIABLE_ANONYMOUS", start: 0, end: 1, line: 1, content: "_" },
       ],
-    } satisfies RulesetParserObject);
+    } satisfies ParserObject);
 
     expect(newState.current).toBe(1);
   });

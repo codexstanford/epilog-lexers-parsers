@@ -1,4 +1,4 @@
-import type { ParserState, RulesetParserObject } from "../types";
+import type { ParserState, ParserObject } from "../types";
 import {
   consumeWhitespacesAndComments,
   createParserObject,
@@ -36,7 +36,7 @@ import { parseTerm } from "./term";
 export function parseListTerm(
   state: ParserState,
   checkExclamationSeparated = true
-): [RulesetParserObject | null, ParserState] {
+): [ParserObject | null, ParserState] {
   // Try parsing nil constant
   const [nilResult, nilState] = parseNilConstant(state);
   if (nilResult) return [nilResult, nilState];
@@ -61,7 +61,7 @@ export function parseListTerm(
 
 function parseNilConstant(
   state: ParserState
-): [RulesetParserObject | null, ParserState] {
+): [ParserObject | null, ParserState] {
   const token = peek(state);
   if (!token || token.type !== "SYMBOL_TERM" || token.content !== "nil") {
     return [null, state];
@@ -81,13 +81,13 @@ function parseNilConstant(
 
 function parseBracketedList(
   state: ParserState
-): [RulesetParserObject | null, ParserState] {
+): [ParserObject | null, ParserState] {
   const firstToken = peek(state);
   if (!firstToken || firstToken.type !== "OPEN_BRACKET") {
     return [null, state];
   }
 
-  const children: RulesetParserObject[] = [firstToken];
+  const children: ParserObject[] = [firstToken];
   let currentState = advance(state)[1];
   let hasError = false;
 
@@ -153,7 +153,7 @@ function parseBracketedList(
 
 function parseBracketedListElement(
   state: ParserState,
-  children: RulesetParserObject[]
+  children: ParserObject[]
 ): [boolean, ParserState] {
   const lastNonWhitespace = getLastNonWhitespaceOrCommentObject(children);
   if (!lastNonWhitespace) throw Error("Expected at least opening bracket");
@@ -171,7 +171,7 @@ function parseBracketedListElement(
 
 function parseTermElement(
   state: ParserState,
-  children: RulesetParserObject[],
+  children: ParserObject[],
   checkExclamationSeparated?: boolean
 ): [boolean, ParserState] {
   const [termObject, newState] = parseTerm(state, checkExclamationSeparated);
@@ -192,7 +192,7 @@ function parseTermElement(
 
 function parseCommaElement(
   state: ParserState,
-  children: RulesetParserObject[]
+  children: ParserObject[]
 ): [boolean, ParserState] {
   const token = peek(state);
 
@@ -216,11 +216,11 @@ function parseCommaElement(
 
 function parseExclamationSeparatedList(
   state: ParserState
-): [RulesetParserObject | null, ParserState] {
+): [ParserObject | null, ParserState] {
   const [firstTerm, afterFirstTerm] = parseTerm(state, false);
   if (!firstTerm) return [null, state];
 
-  const children: RulesetParserObject[] = [firstTerm];
+  const children: ParserObject[] = [firstTerm];
   let currentState = afterFirstTerm;
   let hasError = false;
   let isExpectingTerm = true;

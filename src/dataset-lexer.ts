@@ -11,9 +11,9 @@ import { handleConstant } from "./lexer/constant";
 import { handleNumber } from "./lexer/number";
 import { handleString } from "./lexer/string";
 import { handleWhitespace } from "./lexer/whitespace";
-import type { LexerState, RulesetToken } from "./types";
+import type { LexerState, Token } from "./types";
 
-export function datasetLexer(input: string): RulesetToken[] {
+export function datasetLexer(input: string): Token[] {
   const state: LexerState = createLexerState(input);
 
   while (state.pos < input.length) {

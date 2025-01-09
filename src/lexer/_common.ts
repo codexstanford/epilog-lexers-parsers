@@ -1,4 +1,4 @@
-import type { LexerState, RulesetToken, RulesetTokenType } from "../types";
+import type { LexerState, Token, RulesetTokenType } from "../types";
 
 /* -------------------------------------------------------------------------- */
 /*                                    Const                                   */
@@ -67,7 +67,7 @@ export function createToken(
   type: RulesetTokenType,
   start: number,
   errorMessage?: string
-): RulesetToken {
+): Token {
   return {
     type,
     line: state.line,

@@ -1,4 +1,4 @@
-import type { ParserState, RulesetParserObject } from "../types";
+import type { ParserState, ParserObject } from "../types";
 import { createParserObject } from "./_common";
 import { advance, peek } from "./_control-flow";
 import { parseCompoundTerm } from "./compound-term";
@@ -15,7 +15,7 @@ import { parseCompoundTerm } from "./compound-term";
  */
 export function parseAtom(
   state: ParserState
-): [RulesetParserObject | null, ParserState] {
+): [ParserObject | null, ParserState] {
   // Try parsing compound term
   const [compoundResult, compoundState] = parseCompoundTerm(state);
   if (compoundResult && compoundResult.children) {

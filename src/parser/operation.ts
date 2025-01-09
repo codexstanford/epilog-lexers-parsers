@@ -1,4 +1,4 @@
-import type { ParserState, RulesetParserObject } from "../types";
+import type { ParserState, ParserObject } from "../types";
 import { consumeWhitespacesAndComments, createParserObject } from "./_common";
 import { advance, peek } from "./_control-flow";
 import { parseAtom } from "./atom";
@@ -16,11 +16,11 @@ import { parseOneOrMoreAmpersandSeparatedLiterals } from "./rule";
  */
 export function parseOperation(
   state: ParserState
-): [RulesetParserObject | null, ParserState] {
+): [ParserObject | null, ParserState] {
   const [atomResult, atomState] = parseAtom(state);
   if (!atomResult) return [null, state];
 
-  const children: RulesetParserObject[] = [atomResult];
+  const children: ParserObject[] = [atomResult];
   let currentState = atomState;
   let hasError = false;
 

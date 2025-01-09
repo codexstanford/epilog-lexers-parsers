@@ -1,4 +1,4 @@
-import type { ParserState, RulesetParserObject } from "../types";
+import type { ParserState, ParserObject } from "../types";
 import { consumeWhitespacesAndComments, createParserObject } from "./_common";
 import {
   advance,
@@ -18,11 +18,11 @@ import { parseTerm } from "./term";
  */
 export function parseDefinition(
   state: ParserState
-): [RulesetParserObject | null, ParserState] {
+): [ParserObject | null, ParserState] {
   const [termResult1, termState1] = parseTerm(state);
   if (!termResult1) return [null, state];
 
-  const children: RulesetParserObject[] = [termResult1];
+  const children: ParserObject[] = [termResult1];
   let currentState = termState1;
 
   // Consume whitespaces and comments after term

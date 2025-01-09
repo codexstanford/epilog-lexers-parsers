@@ -1,13 +1,13 @@
-import type { ParserState, RulesetParserObject } from "../types";
+import type { ParserState, ParserObject } from "../types";
 import { advance, peek } from "./_control-flow";
 
-export function isWhitespaceOrComment(token: RulesetParserObject): boolean {
+export function isWhitespaceOrComment(token: ParserObject): boolean {
   return token.type === "WHITESPACE" || token.type === "COMMENT";
 }
 
 export function getLastNonWhitespaceOrCommentObject(
-  tokens: RulesetParserObject[]
-): RulesetParserObject | null {
+  tokens: ParserObject[]
+): ParserObject | null {
   for (let i = tokens.length - 1; i >= 0; i--) {
     if (!isWhitespaceOrComment(tokens[i])) return tokens[i];
   }
@@ -16,8 +16,8 @@ export function getLastNonWhitespaceOrCommentObject(
 
 export function consumeWhitespacesAndComments(
   state: ParserState
-): [RulesetParserObject[], ParserState] {
-  const children: RulesetParserObject[] = [];
+): [ParserObject[], ParserState] {
+  const children: ParserObject[] = [];
   let currentState = state;
 
   while (peek(currentState) && isWhitespaceOrComment(peek(currentState)!)) {
@@ -34,10 +34,10 @@ export function consumeWhitespacesAndComments(
 }
 
 export function createParserObject(
-  type: RulesetParserObject["type"],
-  children: RulesetParserObject[],
+  type: ParserObject["type"],
+  children: ParserObject[],
   errorMsg?: string
-): RulesetParserObject {
+): ParserObject {
   const [firstChild] = children;
   const lastChild = children[children.length - 1];
 

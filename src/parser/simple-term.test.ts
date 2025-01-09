@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { datasetLexer } from "../dataset-lexer";
-import type { RulesetParserObject } from "../types";
+import type { ParserObject } from "../types";
 import { createParserState } from "./_control-flow";
 import { parseSimpleTerm } from "./simple-term";
 
@@ -19,7 +19,7 @@ describe("parseSimpleTerm", () => {
       children: [
         { type: "SYMBOL_TERM", start: 0, end: 1, line: 1, content: "x" },
       ],
-    } satisfies RulesetParserObject);
+    } satisfies ParserObject);
 
     expect(newState.current).toBe(1);
   });
@@ -36,7 +36,7 @@ describe("parseSimpleTerm", () => {
       line: 1,
       content: "42",
       children: [{ type: "NUMBER", start: 0, end: 2, line: 1, content: "42" }],
-    } satisfies RulesetParserObject);
+    } satisfies ParserObject);
 
     expect(newState.current).toBe(1);
   });
@@ -55,7 +55,7 @@ describe("parseSimpleTerm", () => {
       children: [
         { type: "STRING", start: 0, end: 7, line: 1, content: '"hello"' },
       ],
-    } satisfies RulesetParserObject);
+    } satisfies ParserObject);
 
     expect(newState.current).toBe(1);
   });

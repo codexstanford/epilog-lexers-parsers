@@ -1,4 +1,4 @@
-import type { ParserState, RulesetParserObject } from "../types";
+import type { ParserState, ParserObject } from "../types";
 import { createParserObject } from "./_common";
 import { advance, peek } from "./_control-flow";
 import { parseAtom } from "./atom";
@@ -11,10 +11,10 @@ import { parseAtom } from "./atom";
  */
 export function parseLiteral(
   state: ParserState
-): [RulesetParserObject | null, ParserState] {
+): [ParserObject | null, ParserState] {
   const nextToken = peek(state);
   let currentState = state;
-  const children: RulesetParserObject[] = [];
+  const children: ParserObject[] = [];
 
   // Check for optional negation symbol
   if (nextToken && nextToken.type === "NEGATION_SYMBOL") {

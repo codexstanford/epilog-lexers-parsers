@@ -16,8 +16,6 @@ export interface Base {
 /*                                    Lexer                                   */
 /* -------------------------------------------------------------------------- */
 
-/* --------------------------------- Dataset -------------------------------- */
-
 export type DatasetTokenType =
   | "WHITESPACE"
   | "SYMBOL_TERM"
@@ -33,12 +31,6 @@ export type DatasetTokenType =
   | "PERIOD"
   | "ERROR";
 
-export interface DatasetToken extends Base {
-  type: DatasetTokenType;
-}
-
-/* --------------------------------- Ruleset -------------------------------- */
-
 export type RulesetTokenType =
   | DatasetTokenType
   | "VARIABLE_NAMED" // a string of letters, digits, and underscores beginning with an uppercase letter
@@ -50,27 +42,24 @@ export type RulesetTokenType =
   | "DOUBLE_ARROW" // ==>
   | "DEFINITION_SEPARATOR"; // :=
 
-export interface RulesetToken extends Base {
+export interface Token extends Base {
   type: RulesetTokenType;
 }
-
-/* --------------------------------- Common --------------------------------- */
 
 export interface LexerState {
   input: string;
   pos: number;
   line: number;
   lineBeganAtPos: number;
-  tokens: RulesetToken[];
+  tokens: Token[];
 }
 
 /* -------------------------------------------------------------------------- */
 /*                                   Parser                                   */
 /* -------------------------------------------------------------------------- */
 
-/* --------------------------------- Dataset -------------------------------- */
-
 export type DatasetParserObjectType =
+  | DatasetTokenType
   | "DATASET"
   | "FACT"
   | "TERM"
@@ -78,15 +67,7 @@ export type DatasetParserObjectType =
   | "COMPOUND_TERM"
   | "LIST_TERM"
   | "SYMBOL_TERM"
-  | "NIL"
-  | DatasetTokenType;
-
-export interface DatasetParserObject extends Base {
-  type: DatasetParserObjectType;
-  children?: DatasetParserObject[];
-}
-
-/* --------------------------------- Ruleset -------------------------------- */
+  | "NIL";
 
 export type RulesetParserObjectType =
   | DatasetParserObjectType
@@ -107,15 +88,13 @@ export type RulesetParserObjectType =
   | "DEFINITION" // TODO Wasn't mentioned in the spec
   | "RULESET";
 
-export interface RulesetParserObject extends Base {
+export interface ParserObject extends Base {
   type: RulesetParserObjectType;
-  children?: RulesetParserObject[];
+  children?: ParserObject[];
 }
-
-/* --------------------------------- Common --------------------------------- */
 
 export interface ParserState {
   setType: "DATASET" | "RULESET";
-  tokens: RulesetToken[];
+  tokens: Token[];
   current: number;
 }

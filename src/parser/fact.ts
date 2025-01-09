@@ -1,4 +1,4 @@
-import type { ParserState, RulesetParserObject } from "../types";
+import type { ParserState, ParserObject } from "../types";
 import { createParserObject } from "./_common";
 import { advance, peek } from "./_control-flow";
 import { parseCompoundTerm } from "./compound-term";
@@ -20,8 +20,8 @@ import { parseCompoundTerm } from "./compound-term";
  */
 export function parseFact(
   state: ParserState
-): [RulesetParserObject | null, ParserState] {
-  const children = [] as RulesetParserObject[];
+): [ParserObject | null, ParserState] {
+  const children = [] as ParserObject[];
   let currentState = state;
 
   // Try parsing compound term

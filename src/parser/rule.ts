@@ -1,4 +1,4 @@
-import type { ParserState, RulesetParserObject } from "../types";
+import type { ParserState, ParserObject } from "../types";
 import {
   consumeWhitespacesAndComments,
   createParserObject,
@@ -24,11 +24,11 @@ import { parseLiteral } from "./literal";
  */
 export function parseRule(
   state: ParserState
-): [RulesetParserObject | null, ParserState] {
+): [ParserObject | null, ParserState] {
   const [atomResult, atomState] = parseAtom(state);
   if (!atomResult) return [null, state];
 
-  const children: RulesetParserObject[] = [atomResult];
+  const children: ParserObject[] = [atomResult];
   let currentState = atomState;
   let hasError = false;
 
@@ -70,8 +70,8 @@ export function parseRule(
 
 export function parseOneOrMoreAmpersandSeparatedLiterals(
   state: ParserState
-): [RulesetParserObject[], ParserState, boolean] {
-  const children: RulesetParserObject[] = [];
+): [ParserObject[], ParserState, boolean] {
+  const children: ParserObject[] = [];
   let currentState = state;
   let hasError = false;
 
@@ -145,7 +145,7 @@ export function parseOneOrMoreAmpersandSeparatedLiterals(
  */
 function parseRuleBodyElement(
   state: ParserState,
-  children: RulesetParserObject[]
+  children: ParserObject[]
 ): [boolean, ParserState] {
   const lastNonWhitespaceToken = getLastNonWhitespaceOrCommentObject(children);
 
@@ -166,7 +166,7 @@ function parseRuleBodyElement(
 
 export function parseLiteralElement(
   state: ParserState,
-  children: RulesetParserObject[]
+  children: ParserObject[]
 ): [boolean, ParserState] {
   const [literalObject, newState] = parseLiteral(state);
 
@@ -185,7 +185,7 @@ export function parseLiteralElement(
 
 export function parseOptionalAmpersandElement(
   state: ParserState,
-  children: RulesetParserObject[]
+  children: ParserObject[]
 ): [boolean, ParserState] {
   const token = peek(state);
 

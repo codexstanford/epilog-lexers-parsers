@@ -1,4 +1,4 @@
-import type { ParserState, RulesetParserObject } from "../types";
+import type { ParserState, ParserObject } from "../types";
 import { createParserObject } from "./_common";
 import { parseCompoundTerm } from "./compound-term";
 import { parseSimpleTerm } from "./simple-term";
@@ -17,7 +17,7 @@ import { parseVariable } from "./variable";
 export function parseTerm(
   state: ParserState,
   checkExclamationSeparated = true
-): [RulesetParserObject | null, ParserState] {
+): [ParserObject | null, ParserState] {
   // Try parsing compound term
   const [compoundResult, compoundState] = parseCompoundTerm(state);
   if (compoundResult) {

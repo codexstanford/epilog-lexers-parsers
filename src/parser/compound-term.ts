@@ -1,4 +1,4 @@
-import type { ParserState, RulesetParserObject } from "../types";
+import type { ParserState, ParserObject } from "../types";
 import {
   createParserObject,
   getLastNonWhitespaceOrCommentObject,
@@ -26,11 +26,11 @@ import { parseTerm } from "./term";
  */
 export function parseCompoundTerm(
   state: ParserState
-): [RulesetParserObject | null, ParserState] {
+): [ParserObject | null, ParserState] {
   const identifier = peek(state);
   if (!identifier || identifier.type !== "SYMBOL_TERM") return [null, state];
 
-  const children: RulesetParserObject[] = [identifier];
+  const children: ParserObject[] = [identifier];
   let currentState = advance(state)[1];
   let hasError = false;
 
@@ -110,7 +110,7 @@ export function parseCompoundTerm(
 
 function parseCompoundTermElement(
   state: ParserState,
-  children: RulesetParserObject[]
+  children: ParserObject[]
 ): [boolean, ParserState] {
   const lastNonWhitespace = getLastNonWhitespaceOrCommentObject(children);
 
@@ -130,7 +130,7 @@ function parseCompoundTermElement(
 
 function parseTermElement(
   state: ParserState,
-  children: RulesetParserObject[]
+  children: ParserObject[]
 ): [boolean, ParserState] {
   const [termObject, newState] = parseTerm(state);
 
@@ -149,7 +149,7 @@ function parseTermElement(
 
 function parseCommaElement(
   state: ParserState,
-  children: RulesetParserObject[]
+  children: ParserObject[]
 ): [boolean, ParserState] {
   const token = peek(state);
 

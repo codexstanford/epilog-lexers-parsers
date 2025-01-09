@@ -14,9 +14,9 @@ import { handleString } from "./lexer/string";
 import { handleWhitespace } from "./lexer/whitespace";
 import { handleVariable } from "./lexer/variable";
 import { handleOperator } from "./lexer/operator";
-import type { LexerState, RulesetToken } from "./types";
+import type { LexerState, Token } from "./types";
 
-export function rulesetLexer(input: string): RulesetToken[] {
+export function rulesetLexer(input: string): Token[] {
   const state: LexerState = createLexerState(input);
 
   while (state.pos < input.length) {

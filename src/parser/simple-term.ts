@@ -1,5 +1,5 @@
 import { peek, advance } from "./_control-flow";
-import type { ParserState, RulesetParserObject } from "../types";
+import type { ParserState, ParserObject } from "../types";
 
 /**
  * Child is one of the following:
@@ -10,7 +10,7 @@ import type { ParserState, RulesetParserObject } from "../types";
  */
 export function parseSimpleTerm(
   state: ParserState
-): [RulesetParserObject | null, ParserState] {
+): [ParserObject | null, ParserState] {
   const token = peek(state);
 
   if (!token || !["SYMBOL_TERM", "NUMBER", "STRING"].includes(token.type))

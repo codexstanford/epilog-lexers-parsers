@@ -1,4 +1,4 @@
-import type { ParserState, RulesetParserObject, RulesetToken } from "../types";
+import type { ParserState, ParserObject, Token } from "../types";
 
 /**
  * Creates initial parser state from tokens, filtering out whitespace and comments
@@ -6,7 +6,7 @@ import type { ParserState, RulesetParserObject, RulesetToken } from "../types";
  * @returns Clean parser state ready for processing
  */
 export function createParserState(
-  tokens: RulesetToken[],
+  tokens: Token[],
   setType: "DATASET" | "RULESET"
 ): ParserState {
   return {
@@ -21,7 +21,7 @@ export function createParserState(
  * @param state Current parser state
  * @returns The current token or null if at end of input
  */
-export function peek(state: ParserState): RulesetToken | null {
+export function peek(state: ParserState): Token | null {
   return state.current < state.tokens.length
     ? state.tokens[state.current]
     : null;
@@ -32,9 +32,7 @@ export function peek(state: ParserState): RulesetToken | null {
  * @param state Current parser state
  * @returns Tuple of [consumed token, new state]
  */
-export function advance(
-  state: ParserState
-): [RulesetToken | null, ParserState] {
+export function advance(state: ParserState): [Token | null, ParserState] {
   if (state.current >= state.tokens.length) return [null, state];
   const token = state.tokens[state.current];
   return [token, { ...state, current: state.current + 1 }];
@@ -43,7 +41,7 @@ export function advance(
 export function createErrorObjectAndAdvanceToNextLine(
   state: ParserState,
   errorMessage: string
-): [RulesetParserObject, ParserState] {
+): [ParserObject, ParserState] {
   let currentToken = peek(state);
 
   if (!currentToken)
@@ -59,7 +57,7 @@ export function createErrorObjectAndAdvanceToNextLine(
       state,
     ];
 
-  const children: RulesetToken[] = [];
+  const children: Token[] = [];
   const currentLine = currentToken.line;
   let currentState = state;
 

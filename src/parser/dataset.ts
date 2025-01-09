@@ -1,4 +1,4 @@
-import type { RulesetParserObject, RulesetToken } from "../types";
+import type { ParserObject, Token } from "../types";
 import { consumeWhitespacesAndComments, createParserObject } from "./_common";
 import {
   createErrorObjectAndAdvanceToNextLine,
@@ -11,9 +11,9 @@ import { parseFact } from "./fact";
  * Children are 0 to many facts and whitespaces, can be mixed
  * @param state
  */
-export function parseDataset(tokens: RulesetToken[]): RulesetParserObject {
+export function parseDataset(tokens: Token[]): ParserObject {
   let currentState = createParserState(tokens, "DATASET");
-  const children = [] as RulesetParserObject[];
+  const children = [] as ParserObject[];
 
   while (true) {
     // Consume whitespaces before trying to parse a fact
