@@ -1,5 +1,5 @@
 import { expect } from "bun:test";
-import type { RulesetToken } from "./types";
+import type { RulesetParserObject, RulesetToken } from "./types";
 
 export function validateTokenBoundaries(input: string, tokens: RulesetToken[]) {
   // Sum of all tokens (end - start) should be equal to the input length
@@ -25,4 +25,33 @@ export function validateTokenBoundaries(input: string, tokens: RulesetToken[]) {
   tokens.forEach((token) => {
     expect(token.content.length).toBe(token.end - token.start);
   });
+}
+
+export function findErrorPaths(
+  obj: RulesetParserObject
+): RulesetParserObject[][] {
+  const paths: RulesetParserObject[][] = [];
+
+  function traverse(
+    node: RulesetParserObject,
+    currentPath: RulesetParserObject[]
+  ) {
+    // Add current node to path
+    currentPath.push(node);
+
+    // If current node is an error, add the path
+    if (node.type === "ERROR") {
+      paths.push([...currentPath]);
+    }
+
+    // Traverse all possible children
+    if (node.children) {
+      for (const child of node.children) {
+        traverse(child, [...currentPath]);
+      }
+    }
+  }
+
+  traverse(obj, []);
+  return paths;
 }
