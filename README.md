@@ -10,12 +10,12 @@ bun add epilog-lexers-parsers
 
 ## Usage
 
-The library exports four main functions:
+Download the latest release. The library exports four main functions (for the imports to work, make sure to colocate the release file with your code):
 
 ### Lexers
 
 ```typescript
-import { datasetLexer, rulesetLexer } from "index.js"; // or, if Typescript package is used: "epilog-lexers-parsers"; "epilog-lexers-parsers";
+import { datasetLexer, rulesetLexer } from "./epilog-lexers-parsers.js";
 
 // Tokenize a dataset
 const datasetTokens = datasetLexer("father(john, mary).");
@@ -29,7 +29,7 @@ const rulesetTokens = rulesetLexer("ancestor(X, Y) :- parent(X, Y).");
 ### Parsers
 
 ```typescript
-import { parseDataset, parseRuleset } from "index.js"; // or, if Typescript package is used: "epilog-lexers-parsers";
+import { parseDataset, parseRuleset } from "./epilog-lexers-parsers.js";
 
 // Parse a dataset (requires tokens from datasetLexer)
 const datasetAst = parseDataset(datasetTokens);
