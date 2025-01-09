@@ -223,7 +223,7 @@ describe("parseRuleset", () => {
 
       const errors = findErrors(result);
 
-      if (errors.length) console.log(JSON.stringify(errors, null, 2));
+      // if (errors.length) console.log(JSON.stringify(errors, null, 2));
 
       expect(errors).toHaveLength(0);
     });

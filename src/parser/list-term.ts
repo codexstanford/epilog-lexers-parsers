@@ -105,7 +105,7 @@ function parseBracketedList(
     if (token.type === "CLOSE_BRACKET") {
       // A close bracket is not allowed directly after a comma
       const lastNonWhitespace = getLastNonWhitespaceOrCommentObject(children);
-      if (lastNonWhitespace?.type === "COMMA") {
+      if (lastNonWhitespace?.type === "LIST_SEPARATOR") {
         hasError = true;
         const [errorObject, errorState] = createErrorObjectAndAdvanceToNextLine(
           currentState,
@@ -151,7 +151,7 @@ function parseBracketedListElement(
 
   const isExpectingTerm =
     lastNonWhitespace.type === "OPEN_BRACKET" ||
-    lastNonWhitespace.type === "COMMA";
+    lastNonWhitespace.type === "LIST_SEPARATOR";
 
   if (isExpectingTerm) {
     return parseTermElement(state, children);
@@ -186,7 +186,7 @@ function parseCommaElement(
 ): [boolean, ParserState] {
   const token = peek(state);
 
-  if (token?.type !== "COMMA") {
+  if (token?.type !== "LIST_SEPARATOR") {
     const [errorObject, errorState] = createErrorObjectAndAdvanceToNextLine(
       state,
       `Expected comma, but found ${token?.type}`
